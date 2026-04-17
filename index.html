@@ -14,7 +14,7 @@
   --accent:#FF6B35;--green:#30d158;--blue:#0a84ff;--red:#ff453a;
   --text:#fff;--text2:rgba(235,235,245,.8);--text3:rgba(235,235,245,.5);
   --sep:rgba(84,84,88,.6);
-  --nav:83px;
+  --nav:60px;
   --st:env(safe-area-inset-top,44px);
   --sb:env(safe-area-inset-bottom,34px);
 }
@@ -195,7 +195,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ===== MEAL ALERT ===== */
-.meal-alert{position:fixed;top:var(--st);left:50%;transform:translateX(-50%) translateY(-130%);width:calc(100% - 32px);max-width:398px;background:var(--card);border-radius:18px;padding:16px;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.6);border:1px solid rgba(255,107,53,.3)}
+.meal-alert{position:fixed;top:var(--st);left:50%;transform:translateX(-50%) translateY(calc(-100% - var(--st) - 20px));width:calc(100% - 32px);max-width:398px;background:var(--card);border-radius:18px;padding:16px;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.6);border:1px solid rgba(255,107,53,.3)}
 .meal-alert.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
