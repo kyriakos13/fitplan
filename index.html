@@ -348,6 +348,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
       <div class="ph-name" id="p-name"></div>
       <div class="ph-sub" id="p-sub"></div>
     </div>
+    <button class="back-btn" onclick="resetCurrentEx()" style="font-size:17px;color:var(--text3)" title="Reset σετ">↺</button>
   </div>
   <div class="prog-track"><div class="prog-fill" id="p-prog" style="width:0%"></div></div>
   <div class="pbody" id="pbody">
@@ -714,6 +715,22 @@ function showWorkoutDone(){
 function closeDone(){
   closePlayer();
   nav('today');
+}
+
+function resetCurrentEx(){
+  ps.resting=false;
+  clearInterval(ps.rint);
+  ps.si=0;
+  const p=getWoProg();
+  delete p[ps.ei];
+  localStorage.setItem(woProgKey(),JSON.stringify(p));
+  // unmark from exercise list
+  const n=document.getElementById('en'+ps.ei);
+  const it=document.getElementById('ei'+ps.ei);
+  if(n){n.textContent=ps.ei+1;n.classList.remove('done')}
+  if(it){it.classList.remove('completed')}
+  updatePlayer();
+  toast('↺ Reset — ξανά από Σετ 1');
 }
 
 function closePlayer(){
