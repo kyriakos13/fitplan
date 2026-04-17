@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitPlan">
+<title>FitPlan</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{
+  --bg:#000;--card:#1c1c1e;--card2:#2c2c2e;
+  --accent:#FF6B35;--green:#30d158;--blue:#0a84ff;--red:#ff453a;
+  --text:#fff;--text2:rgba(235,235,245,.8);--text3:rgba(235,235,245,.5);
+  --sep:rgba(84,84,88,.6);
+  --nav:60px;
+  --st:env(safe-area-inset-top,44px);
+  --sb:env(safe-area-inset-bottom,34px);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;background:var(--bg);color:var(--text);max-width:430px;margin:0 auto}
+.app{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.pages{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav) + var(--sb) + 8px);padding-top:var(--st);display:none}
+.page.active{display:block}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--nav) + var(--sb));padding-bottom:var(--sb);background:rgba(20,20,22,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--sep);display:flex;align-items:flex-start;justify-content:space-around;padding-top:10px;z-index:100}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;background:none;border:none;color:var(--text3);cursor:pointer;min-width:60px;transition:color .15s}
+.nb.active{color:var(--accent)}
+.nb-icon{font-size:22px;line-height:1}
+.nb-label{font-size:10px;font-weight:600}
+
+/* UTILS */
+.card{background:var(--card);border-radius:16px;overflow:hidden}
+.section-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;padding:0 16px;margin-bottom:8px}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;font-family:inherit;font-size:17px;font-weight:700;cursor:pointer;transition:opacity .1s,transform .1s;text-align:center}
+.btn:active{opacity:.8;transform:scale(.98)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-secondary{background:var(--card2);color:var(--text)}
+.btn-green{background:var(--green);color:#fff}
+
+/* ===== TODAY ===== */
+.t-header{padding:16px 16px 0}
+.t-greeting{font-size:28px;font-weight:800}
+.t-date{font-size:14px;color:var(--text3);margin-top:2px}
+.t-section{padding:16px 16px 0}
+
+.cur-meal{background:linear-gradient(135deg,rgba(255,107,53,.18),rgba(255,107,53,.04));border:1.5px solid rgba(255,107,53,.35);border-radius:20px;padding:20px;margin-bottom:10px}
+.meal-badge{display:inline-flex;align-items:center;gap:5px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:100px;margin-bottom:10px}
+.cur-meal-name{font-size:22px;font-weight:800;margin-bottom:8px}
+.foods-ul{list-style:none;margin-bottom:12px}
+.foods-ul li{font-size:15px;color:var(--text2);padding:3px 0}
+.foods-ul li::before{content:'→ ';color:var(--accent)}
+.macros{display:flex;gap:16px}
+.mc{font-size:13px;color:var(--text3)}
+.mc span{color:var(--text);font-weight:700}
+
+.next-card{background:var(--card);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.next-icon{font-size:30px}
+.next-info{flex:1}
+.next-lbl{font-size:11px;color:var(--text3)}
+.next-name{font-size:16px;font-weight:700}
+.next-time{font-size:16px;color:var(--accent);font-weight:700}
+
+.targets-card{background:var(--card);border-radius:16px;overflow:hidden}
+.tr{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--sep);gap:12px}
+.tr:last-child{border-bottom:none}
+.tr-icon{font-size:18px;width:26px;text-align:center}
+.tr-label{flex:1;font-size:15px}
+.tr-val{font-size:15px;font-weight:600;color:var(--text3)}
+
+/* ===== GYM ===== */
+.gym-header{padding:calc(var(--st) + 4px) 16px 12px}
+.gym-title{font-size:28px;font-weight:800}
+.gym-sub{font-size:14px;color:var(--text3);margin-top:3px}
+
+.day-sel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px 16px}
+.day-btn{background:var(--card);border:2px solid transparent;border-radius:14px;padding:14px 6px;text-align:center;cursor:pointer;font-family:inherit;transition:all .15s}
+.day-btn.active{background:rgba(255,255,255,.06)}
+.db-name{font-size:17px;font-weight:800;display:block}
+.db-day{font-size:11px;font-weight:600;margin-top:3px;display:block}
+.db-sub{font-size:9px;color:var(--text3);display:block;margin-top:1px}
+
+.ex-list{padding:0 16px}
+.ex-item{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid transparent;transition:opacity .1s}
+.ex-item:active{opacity:.7}
+.ex-item.priority{border-color:rgba(255,107,53,.35)}
+.ex-item.completed{opacity:.45}
+.ex-num{width:32px;height:32px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.ex-num.done{background:var(--green);color:#fff}
+.ex-info{flex:1}
+.ex-name{font-size:15px;font-weight:600}
+.ex-detail{font-size:12px;color:var(--text3);margin-top:2px}
+.ex-chev{color:var(--text3);font-size:20px;font-weight:300}
+
+/* ===== PLAYER ===== */
+.player{position:fixed;inset:0;background:var(--bg);z-index:150;display:none;flex-direction:column;padding-top:var(--st);padding-bottom:calc(var(--sb) + 16px)}
+.player.show{display:flex}
+.ph{display:flex;align-items:center;padding:10px 16px;gap:12px}
+.back-btn{background:var(--card2);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:18px;flex-shrink:0}
+.ph-info{flex:1}
+.ph-name{font-size:19px;font-weight:800;line-height:1.2}
+.ph-sub{font-size:12px;color:var(--text3);margin-top:1px}
+
+.prog-track{height:4px;background:var(--card2);margin:4px 16px 12px;border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+
+.pbody{flex:1;overflow-y:auto;padding:0 16px}
+
+.set-dots{display:flex;gap:10px;padding:16px 0 12px;justify-content:center}
+.sd{width:14px;height:14px;border-radius:50%;background:var(--card2);transition:all .25s}
+.sd.done{background:var(--green)}
+.sd.cur{background:var(--accent);transform:scale(1.35)}
+
+.set-area{text-align:center;padding:8px 0 20px}
+.set-lbl{font-size:14px;color:var(--text3);margin-bottom:4px}
+.set-big{font-size:72px;font-weight:900;line-height:1}
+.set-reps{font-size:20px;color:var(--text2);margin-top:4px}
+
+.rest-area{display:none;flex-direction:column;align-items:center;padding:16px 0}
+.rest-area.show{display:flex}
+.rest-ring{position:relative;width:160px;height:160px}
+.rest-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.rr-bg{fill:none;stroke:var(--card2);stroke-width:8}
+.rr-fill{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.rest-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rest-secs{font-size:44px;font-weight:900;line-height:1}
+.rest-lbl{font-size:12px;color:var(--text3)}
+.skip-btn{background:var(--card2);border:none;border-radius:100px;padding:10px 24px;color:var(--text2);font-family:inherit;font-size:15px;cursor:pointer;margin-top:14px}
+
+.cue-card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:10px}
+.cue-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.cue-txt{font-size:15px;color:var(--text2);line-height:1.55}
+
+.yt-btn{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid rgba(255,0,0,.25);border-radius:14px;padding:14px 16px;color:var(--text);font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;width:100%;text-decoration:none;margin-bottom:12px}
+.yt-icon{background:#f00;color:#fff;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:900}
+
+.pfooter{padding:0 16px}
+
+/* ===== PREP GUIDE ===== */
+.prep-guide{position:fixed;inset:0;background:var(--bg);z-index:160;display:none;flex-direction:column;padding-top:var(--st);padding-bottom:calc(var(--sb)+16px)}
+.prep-guide.show{display:flex}
+.pg-head{padding:12px 16px;display:flex;align-items:center;gap:14px}
+.pg-bar{flex:1;height:6px;background:var(--card2);border-radius:3px;overflow:hidden}
+.pg-fill{height:100%;background:var(--green);border-radius:3px;transition:width .5s ease}
+.pg-num{font-size:12px;color:var(--text3);font-weight:700;white-space:nowrap}
+.pg-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;gap:0}
+.pg-emoji{font-size:82px;line-height:1;margin-bottom:20px}
+.pg-title{font-size:25px;font-weight:900;margin-bottom:14px;line-height:1.2;text-align:center}
+.pg-desc{font-size:15px;color:var(--text2);line-height:1.85;white-space:pre-line;background:var(--card);border-radius:14px;padding:16px 18px;width:100%;text-align:left}
+.pg-timer-wrap{margin-top:18px;width:100%;background:var(--card);border-radius:14px;padding:18px;text-align:center}
+.pg-timer-num{font-size:60px;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:-2px}
+.pg-timer-lbl{font-size:13px;color:var(--text3);margin-top:2px}
+.pg-foot{padding:16px 24px 0}
+
+/* ===== FOOD ===== */
+.food-header{padding:calc(var(--st) + 4px) 16px 12px}
+.food-title{font-size:28px;font-weight:800}
+.food-total{font-size:13px;color:var(--text3);margin-top:3px}
+.meal-card{background:var(--card);border-radius:16px;margin:0 16px 8px;overflow:hidden}
+.meal-card.now .mch{background:rgba(255,107,53,.08)}
+.mch{display:flex;align-items:center;padding:16px;gap:12px}
+.meal-emoji{font-size:28px}
+.meal-info{flex:1}
+.meal-name{font-size:16px;font-weight:700}
+.meal-time-t{font-size:12px;color:var(--text3);margin-top:2px}
+.meal-kcal-box{text-align:right}
+.meal-kcal-n{font-size:17px;font-weight:800;color:var(--accent)}
+.meal-prot{font-size:11px;color:var(--text3)}
+.meal-det{padding:0 16px 14px;border-top:1px solid var(--sep)}
+.mf-item{padding:8px 0;font-size:14px;color:var(--text2);border-bottom:1px solid var(--sep);display:flex;gap:8px}
+.mf-item:last-child{border-bottom:none}
+
+/* ===== TRACK ===== */
+.track-header{padding:calc(var(--st) + 4px) 16px 12px}
+.track-title{font-size:28px;font-weight:800}
+.ti-card{background:var(--card);border-radius:16px;margin:0 16px 12px;padding:16px}
+.ti-title{font-size:16px;font-weight:700;margin-bottom:12px}
+.input-row{display:flex;gap:8px;margin-bottom:10px}
+.ig{flex:1}
+.ig label{font-size:12px;color:var(--text3);display:block;margin-bottom:4px}
+.ti{width:100%;background:var(--card2);border:none;border-radius:10px;padding:12px;color:var(--text);font-family:inherit;font-size:18px;font-weight:700;text-align:center}
+.ti:focus{outline:2px solid var(--accent)}
+.log-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--sep);font-size:14px}
+.log-row:last-child{border-bottom:none}
+.log-date{color:var(--text3);flex:1}
+.log-w{font-weight:700;margin-right:14px}
+.log-m{color:var(--text3)}
+.empty-log{text-align:center;color:var(--text3);font-size:14px;padding:20px 0}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:calc(var(--nav) + var(--sb) + 12px);left:50%;transform:translateX(-50%) translateY(10px);background:rgba(50,50,52,.97);color:#fff;padding:12px 20px;border-radius:100px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;white-space:nowrap;z-index:400;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== MEAL ALERT ===== */
+.meal-alert{position:fixed;top:var(--st);left:50%;transform:translateX(-50%) translateY(calc(-100% - var(--st) - 20px));width:calc(100% - 32px);max-width:398px;background:var(--card);border-radius:18px;padding:16px;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.6);border:1px solid rgba(255,107,53,.3)}
+.meal-alert.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="pages">
+
+    <!-- TODAY -->
+    <div class="page active" id="page-today">
+      <div class="t-header">
+        <div class="t-greeting" id="greeting">Καλημέρα 👋</div>
+        <div class="t-date" id="today-date"></div>
+      </div>
+      <div class="t-section" style="padding-top:10px">
+        <div id="streak-area"></div>
+      </div>
+      <div id="notif-banner" style="display:none;background:var(--card);border-radius:14px;margin:8px 16px 0;padding:14px;border:1px solid rgba(255,107,53,.25)"></div>
+      <div class="t-section">
+        <div class="section-title">ΤΩΡΑ</div>
+        <div id="cur-meal-area"></div>
+        <div id="next-meal-area"></div>
+      </div>
+      <div class="t-section">
+        <div class="section-title">ΣΗΜΕΡΑ ΣΤΟ ΓΥΜ</div>
+        <div id="today-workout-area"></div>
+      </div>
+      <div class="t-section" style="padding-bottom:16px">
+        <div class="section-title">ΣΤΟΧΟΙ ΜΕΡΑΣ</div>
+        <div id="quick-log-area"></div>
+      </div>
+    </div>
+
+    <!-- GYM -->
+    <div class="page" id="page-gym">
+      <div class="gym-header">
+        <div class="gym-title">Γυμναστήριο 💪</div>
+        <div class="gym-sub">Επίλεξε μέρα προπόνησης</div>
+      </div>
+      <div class="day-sel" id="day-sel"></div>
+      <div id="workout-content"></div>
+    </div>
+
+    <!-- FOOD -->
+    <div class="page" id="page-food">
+      <div class="food-header">
+        <div class="food-title">Διατροφή 🥗</div>
+        <div class="food-total">1650 kcal · 145g πρωτεΐνη</div>
+      </div>
+      <div id="meals-list"></div>
+      <div style="padding:16px">
+        <div class="section-title" style="margin-bottom:10px">ΕΝΑΛΛΑΚΤΙΚΑ</div>
+        <div class="card" style="padding:16px">
+          <div style="font-size:14px;color:var(--text2);line-height:1.9">
+            🔄 Τόνος ↔ Σολομός κονσέρβα<br>
+            🔄 Ρύζι ↔ Πατάτα βραστή ↔ Ψωμί ολικής<br>
+            🔄 Κοτόπουλο ↔ Γαλοπούλα<br>
+            🔄 Γιαούρτι ↔ Cottage cheese
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--sep)">
+            <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📦 BATCH COOK ΚΥΡΙΑΚΗ — 4 Tupperware</div>
+            <button onclick="openPrep()" style="width:100%;background:linear-gradient(135deg,rgba(48,209,88,.2),rgba(48,209,88,.06));border:1.5px solid rgba(48,209,88,.4);border-radius:14px;padding:16px;color:var(--green);font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;text-align:center">
+              🍳 Ξεκίνα Meal Prep — Βήμα-Βήμα →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRACK -->
+    <div class="page" id="page-track">
+      <div class="track-header">
+        <div class="track-title">Tracking 📊</div>
+      </div>
+      <div class="ti-card">
+        <div class="ti-title">Σημερινές μετρήσεις</div>
+        <div class="input-row">
+          <div class="ig"><label>⚖️ Βάρος (kg)</label><input type="number" class="ti" id="w-in" placeholder="–" step="0.1" min="50" max="120"></div>
+          <div class="ig"><label>📏 Μέση (cm)</label><input type="number" class="ti" id="m-in" placeholder="–" step="0.5" min="60" max="120"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveLog()">Αποθήκευση ✓</button>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="exportData()" style="flex:1;padding:10px;background:var(--card2);border:none;border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">📤 Export backup</button>
+          <button onclick="importData()" style="flex:1;padding:10px;background:var(--card2);border:none;border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">📥 Import</button>
+        </div>
+      </div>
+      <div id="avg-area" style="padding:0 16px 12px"></div>
+      <div style="background:var(--card);border-radius:16px;margin:0 16px 12px;padding:16px">
+        <div style="font-size:16px;font-weight:700;margin-bottom:10px">Ιστορικό</div>
+        <div id="log-hist"></div>
+      </div>
+      <div style="padding:0 16px 12px">
+        <div class="section-title" style="margin-bottom:10px">ΓΥΜΝΑΣΤΗΡΙΟ 💪</div>
+        <div id="wo-cal-area"></div>
+      </div>
+      <div style="padding:0 16px 16px">
+        <div class="section-title" style="margin-bottom:10px">ΣΤΟΧΟΙ ΙΟΥΛΙΟΣ</div>
+        <div class="card" style="padding:16px">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--sep)"><span style="color:var(--text3)">Baseline DEXA (Οκτ 2025)</span><span style="font-weight:700">72.2 kg</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--sep)"><span style="color:var(--text3)">Body fat DEXA</span><span style="font-weight:700">32.7%</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--sep)"><span style="color:var(--text3)">🎯 Στόχος βάρους</span><span style="font-weight:700;color:var(--accent)">68–69 kg</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--sep)"><span style="color:var(--text3)">🎯 Μέση στόχος</span><span style="font-weight:700;color:var(--accent)">&lt;80 cm</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:var(--text3)">🎯 Στόχος BF%</span><span style="font-weight:700;color:var(--accent)">26–28%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div style="padding:calc(var(--st) + 4px) 16px 12px">
+        <div style="font-size:28px;font-weight:800">Ρυθμίσεις ⚙️</div>
+      </div>
+
+      <!-- Gym time -->
+      <div style="background:var(--card);border-radius:16px;margin:0 16px 12px;padding:16px">
+        <div style="font-size:16px;font-weight:700;margin-bottom:12px">⏰ Ώρα Γυμναστηρίου</div>
+        <input type="time" id="gym-time-input" style="width:100%;background:var(--card2);border:none;border-radius:10px;padding:14px;color:var(--text);font-family:inherit;font-size:22px;font-weight:700;text-align:center" value="07:30">
+      </div>
+
+      <!-- Gym days -->
+      <div style="background:var(--card);border-radius:16px;margin:0 16px 12px;padding:16px">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">📅 Μέρες Γυμναστηρίου</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Επίλεξε τι κάνεις κάθε μέρα</div>
+        <div id="days-editor"></div>
+      </div>
+
+      <div style="padding:0 16px 16px">
+        <button class="btn btn-primary" onclick="saveSettings()">Αποθήκευση ⚙️</button>
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <nav class="nav">
+    <button class="nb active" data-page="today" onclick="nav('today')"><span class="nb-icon">🏠</span><span class="nb-label">Σήμερα</span></button>
+    <button class="nb" data-page="gym" onclick="nav('gym')"><span class="nb-icon">💪</span><span class="nb-label">Γυμ</span></button>
+    <button class="nb" data-page="food" onclick="nav('food')"><span class="nb-icon">🥗</span><span class="nb-label">Φαγητό</span></button>
+    <button class="nb" data-page="track" onclick="nav('track')"><span class="nb-icon">📊</span><span class="nb-label">Tracking</span></button>
+    <button class="nb" data-page="settings" onclick="nav('settings')"><span class="nb-icon">⚙️</span><span class="nb-label">Settings</span></button>
+  </nav>
+</div>
+
+<!-- EXERCISE PLAYER -->
+<div class="player" id="player">
+  <div class="ph">
+    <button class="back-btn" onclick="closePlayer()">✕</button>
+    <div class="ph-info">
+      <div class="ph-name" id="p-name"></div>
+      <div class="ph-sub" id="p-sub"></div>
+    </div>
+    <button class="back-btn" onclick="resetCurrentEx()" style="font-size:17px;color:var(--text3)" title="Reset σετ">↺</button>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="p-prog" style="width:0%"></div></div>
+  <div class="pbody" id="pbody">
+    <div class="set-dots" id="set-dots"></div>
+    <div class="set-area" id="set-area">
+      <div class="set-lbl" id="set-lbl">Σετ</div>
+      <div class="set-big" id="set-big">1</div>
+      <div class="set-reps" id="set-reps"></div>
+    </div>
+    <div class="rest-area" id="rest-area">
+      <div class="rest-ring">
+        <svg viewBox="0 0 160 160"><circle class="rr-bg" cx="80" cy="80" r="68"/><circle class="rr-fill" id="rr-fill" cx="80" cy="80" r="68" stroke-dasharray="427" stroke-dashoffset="0"/></svg>
+        <div class="rest-txt"><div class="rest-secs" id="rest-secs">90</div><div class="rest-lbl">δευτερόλεπτα</div></div>
+      </div>
+      <button class="skip-btn" onclick="skipRest()">Παράλειψη →</button>
+    </div>
+    <div class="cue-card"><div class="cue-lbl">Form cue</div><div class="cue-txt" id="p-cue"></div></div>
+    <div id="ex-demo" style="background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:10px;min-height:80px;display:flex;align-items:center;justify-content:center">
+      <div id="ex-demo-inner" style="color:var(--text3);font-size:13px;padding:20px">Φορτώνει demo...</div>
+    </div>
+    <a class="yt-btn" id="yt-link" href="#" rel="noopener"><span class="yt-icon">▶ YT</span><span>YouTube tutorial →</span></a>
+    <!-- WORKOUT DONE SCREEN -->
+    <div id="done-screen" style="display:none">
+      <div style="text-align:center;padding:24px 0 16px">
+        <div style="font-size:72px;margin-bottom:10px">🏆</div>
+        <div style="font-size:26px;font-weight:900;margin-bottom:4px">Τελείωσε!</div>
+        <div style="font-size:15px;color:var(--text3)">Εξαιρετική δουλειά σήμερα</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.04));border:1.5px solid rgba(255,107,53,.35);border-radius:16px;padding:18px;margin-bottom:12px">
+        <div style="font-size:11px;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">⚡ ΕΠΟΜΕΝΟ ΒΗΜΑ</div>
+        <div id="done-meal-name" style="font-size:20px;font-weight:800;margin-bottom:8px"></div>
+        <div id="done-meal-foods" style="font-size:14px;color:var(--text2);line-height:1.8"></div>
+        <div id="done-meal-macros" style="font-size:13px;color:var(--text3);margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="pfooter">
+    <button class="btn btn-primary" id="set-btn" onclick="doSet()">Ολοκλήρωσα το Σετ ✓</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-secondary" id="next-btn" onclick="nextEx()" style="display:none">Επόμενη Άσκηση →</button>
+    <button class="btn btn-green" id="done-btn" onclick="closeDone()" style="display:none">Εντάξει, πάω σπίτι →</button>
+  </div>
+</div>
+
+<!-- PREP GUIDE -->
+<div class="prep-guide" id="prep-guide">
+  <div class="pg-head">
+    <button class="back-btn" onclick="closePrep()">✕</button>
+    <div class="pg-bar"><div class="pg-fill" id="pg-fill" style="width:0%"></div></div>
+    <div class="pg-num" id="pg-num">1 / 8</div>
+  </div>
+  <div class="pg-body" id="pg-body"></div>
+  <div class="pg-foot">
+    <button class="btn btn-green" id="pg-btn" onclick="nextPrepStep()">Έτοιμο ✓</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-secondary" id="pg-timer-btn" style="display:none" onclick="startPrepTimer()"></button>
+  </div>
+</div>
+
+<!-- VIDEO OVERLAY -->
+<div id="vid-overlay" style="display:none;position:fixed;inset:0;z-index:170;background:rgba(0,0,0,.97);flex-direction:column;padding-top:var(--st)">
+  <div style="display:flex;align-items:center;padding:12px 16px;gap:12px">
+    <button onclick="closeVid()" style="background:var(--card2);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0">✕</button>
+    <div id="vid-ex-name" style="font-size:16px;font-weight:700"></div>
+  </div>
+  <div style="padding:0 16px;flex:1">
+    <iframe id="vid-frame" width="100%" height="240" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen style="border-radius:12px;display:block;background:#000"></iframe>
+  </div>
+  <div style="padding:16px;text-align:center;color:var(--text3);font-size:13px">Κλείσε για να επιστρέψεις στην άσκηση</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MEAL ALERT -->
+<div class="meal-alert" id="meal-alert">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <span style="font-size:26px" id="al-icon">🍗</span>
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--accent);font-weight:800">ΩΡΑ ΦΑΓΗΤΟΥ</div>
+      <div style="font-size:17px;font-weight:800" id="al-name">Μεσημέρι</div>
+    </div>
+    <button onclick="hideAlert()" style="background:var(--card2);border:none;border-radius:50%;width:28px;height:28px;color:var(--text3);font-size:16px;cursor:pointer">✕</button>
+  </div>
+  <div id="al-foods" style="font-size:13px;color:var(--text2);line-height:1.7"></div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────
+const MEALS = [
+  {id:'pre', time:'07:20', end:'08:10', icon:'⚡', name:'Pre-workout', kcal:250, prot:25, foods:['1 scoop whey protein','1 μπανάνα']},
+  {id:'post', time:'09:15', end:'10:30', icon:'🥚', name:'Post-workout', kcal:450, prot:40, foods:['3 αυγά ομελέτα (microwave)','200g γιαούρτι 2%','1 κ.γ. ταχίνι']},
+  {id:'lunch', time:'13:00', end:'14:00', icon:'🍗', name:'Μεσημέρι', kcal:620, prot:48, foods:['160g κοτόπουλο ψημένο','150g ρύζι βραστό','Σαλάτα + 1 κ.σ. ελαιόλαδο']},
+  {id:'snack', time:'17:00', end:'18:00', icon:'🥜', name:'Σνακ', kcal:230, prot:22, foods:['200g γιαούρτι 2%','1 κ.σ. peanut butter']},
+  {id:'din', time:'21:00', end:'22:30', icon:'🐟', name:'Βράδυ', kcal:320, prot:35, foods:['150g τόνος (κονσέρβα)','Σαλάτα','1 φέτα ψωμί ολικής']}
+];
+
+const MEAL_SRC={
+  pre:  {icon:'⚡',label:'Αμέσως — shake + μπανάνα'},
+  post: {icon:'🍳',label:'Microwave 3\' — αυγά'},
+  lunch:{icon:'📦',label:'Tupperware (batch cook Κυριακή)'},
+  snack:{icon:'⚡',label:'Αμέσως — άνοιξε & φάε'},
+  din:  {icon:'🥫',label:'Κονσέρβα — γρήγορο 2\''}
+};
+
+const PREP_STEPS=[
+  {emoji:'🛒',title:'Μάζεψε τα υλικά',desc:'Βγάλε από το ψυγείο:\n→ 1 kg κοτόπουλο φιλέτο\n→ 4 αυγά\n→ 400g ρύζι\n→ Ελαιόλαδο, αλάτι, πιπέρι',timer:0},
+  {emoji:'🔥',title:'Άναψε τον φούρνο',desc:'Στρίψε στους 200°C\nΆφησε να ζεσταθεί ~5\'\nΕτοίμαζε κοτόπουλο στο μεταξύ',timer:0},
+  {emoji:'🔪',title:'Ετοίμασε κοτόπουλο',desc:'Κόψε σε μέτρια κομμάτια\nΡίξε ελαιόλαδο, αλάτι, πιπέρι\nΑνακάτεψε καλά — βάλε στο ταψί',timer:0},
+  {emoji:'🍗',title:'Κοτόπουλο στον φούρνο',desc:'Βάλε το ταψί στον φούρνο\nΞεκίνα timer 25\' ↓\nΚάνε ρύζι & αυγά στο μεταξύ',timer:25*60},
+  {emoji:'🍚',title:'Βάλε ρύζι',desc:'Ζύγισε 400g ρύζι\nΠλύνε με κρύο νερό\nΚατσαρόλα: 800ml νερό + ρύζι\nΒράσε 18\' σε χαμηλή φωτιά',timer:18*60},
+  {emoji:'🥚',title:'Αυγά σκληρά',desc:'4 αυγά σε κρύο νερό\nΑνάψε φωτιά — περίμενε να βράσει\nΜόλις βράσει: ξεκίνα timer 10\'',timer:10*60},
+  {emoji:'📦',title:'Φτιάξε 4 Tupperware',desc:'Σε κάθε tupperware:\n→ 160g κοτόπουλο\n→ 150g ρύζι\n→ 1 αυγό\n\nΑυτό = μεσημέρι για 4 μέρες! 🎯',timer:0},
+  {emoji:'❄️',title:'Ψυγείο — DONE!',desc:'Βάλε τα 4 tupperware στο ψυγείο\nΚρατάνε 4-5 μέρες ✓\n\nΜόλις εξοικονόμησες 3 ώρες\nμαγειρέματος για ολόκληρη την εβδομάδα!',timer:0,final:true}
+];
+
+const WO = {
+  push:{key:'push', dayN:'Δευτέρα', day:1, name:'PUSH', color:'#FF6B35', sub:'Στήθος · Ώμοι · Τρικέφαλα', ex:[
+    {el:'Πλάγιος Ώμος (cable)', en:'Cable Lateral Raise', sets:4, reps:'15', rest:60, star:true, cue:'Μονόπλευρα. Αγκώνας ελαφρά λυγισμένος. Σήκωσε μέχρι ύψος ώμου — όχι πιο ψηλά.', yt:'cable lateral raise single arm form technique'},
+    {el:'Incline Πρέσα Στήθους', en:'Incline Chest Press Machine', sets:3, reps:'8–10', rest:90, star:false, cue:'Ψηλή κλίση. Ωμοπλάτες πίσω-κάτω. Σπρώξε ευθεία μπρος, ελεγχόμενη κάθοδος.', yt:'incline chest press machine proper form'},
+    {el:'Πρέσα Ώμου', en:'Shoulder Press Machine', sets:3, reps:'8–10', rest:90, star:false, cue:'Πλάτη κολλητά. Σπρώξε ψηλά χωρίς να κλειδώνεις τους αγκώνες πάνω.', yt:'shoulder press machine proper form'},
+    {el:'Pec Deck', en:'Pec Deck / Πεταλούδα', sets:3, reps:'12', rest:60, star:false, cue:'Αγκώνες στο ύψος ώμου. Έλα ως το μέτωπο, squeeze στη μέση 1 δευτ.', yt:'pec deck fly machine correct form'},
+    {el:'Triceps Pushdown', en:'Triceps Pushdown Cable', sets:2, reps:'12', rest:60, star:false, cue:'Αγκώνες σταθεροί πλάι. Κλείσε τελείως, κατέβα αργά — 2 δευτερόλεπτα.', yt:'triceps pushdown cable proper form'}
+  ]},
+  pull:{key:'pull', dayN:'Τετάρτη', day:3, name:'PULL', color:'#0a84ff', sub:'Πλάτη · Δικέφαλα · Πίσω Ώμος', ex:[
+    {el:'Lat Pulldown Φαρδιά', en:'Lat Pulldown Wide Grip', sets:4, reps:'8–10', rest:90, star:true, cue:'Φαρδύτερα από ώμους. Τράβα στο πηγούνι, στήθος ψηλά — μη γέρνεις πολύ πίσω.', yt:'lat pulldown wide grip form'},
+    {el:'Pullover Μηχάνημα', en:'Nautilus Pullover Machine', sets:3, reps:'12', rest:90, star:true, cue:'Αγκώνες ελαφρά λυγισμένοι. Νιώσε stretch στους lats πάνω. Τράβα με lats, όχι με χέρια.', yt:'nautilus pullover machine lat form'},
+    {el:'Κωπηλατική Στήθους', en:'Chest-Supported Row', sets:3, reps:'10', rest:90, star:false, cue:'Στήθος κολλητά στο μαξιλάρι. Αγκώνες πίσω και κάτω — squeeze πλάτης.', yt:'chest supported row machine form'},
+    {el:'Πίσω Ώμος (reverse deck)', en:'Reverse Pec Deck', sets:3, reps:'15', rest:60, star:false, cue:'Αγκώνες χαλαρά λυγισμένοι. Άνοιξε πλατιά, κράτα 1 δευτ., γύρνα ελεγχόμενα.', yt:'reverse pec deck rear delt form'},
+    {el:'Κάμψη Δικεφάλου', en:'Biceps Curl Machine', sets:2, reps:'10', rest:60, star:false, cue:'Αγκώνες σταθεροί. Κατέβα αργά (2 δευτ.) — το negative είναι το μισό του kέρδους.', yt:'bicep curl machine proper form'}
+  ]},
+  legs:{key:'legs', dayN:'Παρασκευή', day:5, name:'ΠΟΔΙΑ', color:'#30d158', sub:'Γλουτοί · Μηρός · Γάμπα', ex:[
+    {el:'Αποπαγωγή (Έξω μηρός)', en:'Hip Abduction Machine', sets:4, reps:'15', rest:60, star:true, cue:'Άνοιξε αργά ως max range, squeeze γλουτό. Κλείσε ελεγχόμενα — μην αφήνεσαι να πέσεις.', yt:'hip abduction machine glutes proper form'},
+    {el:'Leg Press (Ψηλά-Φαρδιά)', en:'Leg Press High Wide', sets:3, reps:'10–12', rest:90, star:false, cue:'Πόδια ψηλά και φαρδιά = περισσότερος γλουτός. Κατέβα ελεγχόμενα, ανέβα χωρίς κλείδωμα.', yt:'leg press high foot placement glutes activation'},
+    {el:'Κάμψη Μηρού Καθιστή', en:'Seated Leg Curl', sets:3, reps:'12', rest:60, star:false, cue:'Full range: ανέβα τελείως, κατέβα αργά. Κράτα 1 δευτ. στη συστολή.', yt:'seated leg curl machine form'},
+    {el:'Έκταση Μηρού', en:'Leg Extension', sets:2, reps:'15', rest:60, star:false, cue:'Ανέβα ψηλά, squeeze 1 δευτ., κατέβα αργά. Χωρίς ανταρτσάρισμα από τη μέση.', yt:'leg extension machine proper form'},
+    {el:'Γάμπα Όρθια', en:'Standing Calf Raise', sets:3, reps:'15', rest:60, star:false, cue:'Full range: κατέβα ως stretch, ανέβα ψηλά, κράτα 1 δευτ. πάνω. Αργό τέμπο.', yt:'standing calf raise machine form full range'}
+  ]}
+};
+
+// ─── STATE ──────────────────────────────────────────
+let curPage = 'today';
+let selWo = 'push';
+let done = new Set();
+let ps = {wo:null,ei:0,si:0,resting:false,rint:null};
+let lastAlert = '';
+
+// ─── NAVIGATION ─────────────────────────────────────
+function nav(page) {
+  document.querySelector('.page.active').classList.remove('active');
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('active', b.dataset.page===page));
+  curPage = page;
+  if(page==='today') renderToday();
+  if(page==='food') renderFood();
+  if(page==='track') renderTrack();
+  if(page==='settings') renderSettings();
+}
+
+// ─── TODAY ───────────────────────────────────────────
+function toMins(t){const[h,m]=t.split(':').map(Number);return h*60+m}
+function nowMins(){const n=new Date();return n.getHours()*60+n.getMinutes()}
+function ymd(d){return d.toISOString().split('T')[0]}
+
+// ─── STREAK ──────────────────────────────────────────
+function calcStreak(){
+  const woLog=getWoLog();
+  const woDates=new Set(woLog.map(e=>e.date));
+  const today=new Date();
+  const todayStr=ymd(today);
+  const hasAteToday=getEaten().length>0;
+  const hasWoToday=woDates.has(todayStr);
+  let streak=0;
+  let d=new Date(today);
+  // if today has no activity yet, don't break — start from yesterday
+  if(!hasAteToday&&!hasWoToday){d.setDate(d.getDate()-1)}
+  for(let i=0;i<365;i++){
+    const s=ymd(d);
+    const ate=localStorage.getItem('fp_ate_'+d.toDateString());
+    let ateArr=[];try{ateArr=ate?JSON.parse(ate):[]}catch{}
+    const hasActivity=woDates.has(s)||ateArr.length>=2;
+    if(hasActivity){streak++;d.setDate(d.getDate()-1)}
+    else break;
+  }
+  // bump if today counts
+  if((hasWoToday||getEaten().length>=2)&&!(!hasAteToday&&!hasWoToday))streak++;
+  return streak;
+}
+function getBestStreak(){return +(localStorage.getItem('fp_streak_best')||0)}
+function updateBestStreak(cur){if(cur>getBestStreak())localStorage.setItem('fp_streak_best',cur)}
+
+function renderStreak(){
+  const el=document.getElementById('streak-area');if(!el)return;
+  const cur=calcStreak();updateBestStreak(cur);
+  const best=getBestStreak();
+  const emoji=cur===0?'🌱':cur<3?'🔥':cur<7?'🔥🔥':cur<30?'🔥🔥🔥':'👑';
+  const msg=cur===0?'Ξεκίνα σήμερα — φάε 2 γεύματα ή κάνε γυμναστική':cur===1?'Μέρα 1 — μην σπάσεις την αλυσίδα αύριο':`${cur} μέρες στη σειρά · best ${best}`;
+  el.innerHTML=`<div style="background:linear-gradient(135deg,#FF6B3522,#FF6B3508);border:1.5px solid #FF6B3544;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px">
+    <div style="font-size:34px">${emoji}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:22px;font-weight:900;color:#FF6B35;line-height:1.1">${cur} ${cur===1?'μέρα':'μέρες'}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px">${msg}</div>
+    </div>
+  </div>`;
+}
+
+// ─── QUICK LOG (νερό · βήματα · πρωτεΐνη) ────────────
+function waterKey(){return 'fp_water_'+new Date().toDateString()}
+function getWaterToday(){return +(localStorage.getItem(waterKey())||0)}
+function setWater(n){localStorage.setItem(waterKey(),Math.max(0,Math.min(20,n)));renderQuickLog()}
+function incWater(){setWater(getWaterToday()+1)}
+function decWater(){setWater(getWaterToday()-1)}
+
+function stepsKey(){return 'fp_steps_'+new Date().toDateString()}
+function getStepsToday(){return +(localStorage.getItem(stepsKey())||0)}
+function setSteps(n){localStorage.setItem(stepsKey(),Math.max(0,n|0));renderQuickLog()}
+function promptSteps(){const v=prompt('Πόσα βήματα σήμερα;',getStepsToday()||'');if(v!==null&&v!=='')setSteps(+v)}
+
+function getProteinToday(){
+  const eaten=getEaten();
+  return MEALS.filter(m=>eaten.includes(m.id)).reduce((s,m)=>s+m.prot,0);
+}
+function getKcalToday(){
+  const eaten=getEaten();
+  return MEALS.filter(m=>eaten.includes(m.id)).reduce((s,m)=>s+m.kcal,0);
+}
+
+function renderQuickLog(){
+  const el=document.getElementById('quick-log-area');if(!el)return;
+  const w=getWaterToday(),wGoal=10; // 10 × 250ml = 2.5L
+  const st=getStepsToday(),stGoal=10000;
+  const p=getProteinToday(),pGoal=140;
+  const bar=(v,g,c)=>`<div style="height:6px;background:#ffffff12;border-radius:3px;overflow:hidden;margin-top:6px"><div style="height:100%;width:${Math.min(100,v/g*100)}%;background:${c};border-radius:3px;transition:width .3s"></div></div>`;
+  el.innerHTML=`<div style="background:var(--card);border-radius:16px;padding:4px 0;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #ffffff0a">
+      <div style="font-size:24px">💧</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:14px;font-weight:700">Νερό</div><div style="font-size:13px;color:var(--text3)"><strong style="color:var(--text)">${(w*0.25).toFixed(2)}L</strong> / 2.5L</div></div>
+        ${bar(w,wGoal,'#0a84ff')}
+      </div>
+      <button onclick="decWater()" style="width:32px;height:32px;border-radius:50%;border:1px solid #ffffff22;background:transparent;color:var(--text);font-size:18px;font-weight:700;cursor:pointer">−</button>
+      <button onclick="incWater()" style="width:32px;height:32px;border-radius:50%;border:none;background:#0a84ff;color:#fff;font-size:18px;font-weight:700;cursor:pointer">+</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #ffffff0a;cursor:pointer" onclick="promptSteps()">
+      <div style="font-size:24px">👟</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:14px;font-weight:700">Βήματα</div><div style="font-size:13px;color:var(--text3)"><strong style="color:var(--text)">${st.toLocaleString('el')}</strong> / 10.000</div></div>
+        ${bar(st,stGoal,'#30d158')}
+      </div>
+      <div style="font-size:13px;color:var(--text3)">✎</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+      <div style="font-size:24px">🥩</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:14px;font-weight:700">Πρωτεΐνη</div><div style="font-size:13px;color:var(--text3)"><strong style="color:var(--text)">${p}g</strong> / 140g</div></div>
+        ${bar(p,pGoal,'#FF6B35')}
+      </div>
+      <div style="font-size:11px;color:var(--text3);text-align:right;line-height:1.3">από<br>γεύματα</div>
+    </div>
+  </div>`;
+}
+
+function renderToday(){
+  const now=new Date(), h=now.getHours(), dow=now.getDay();
+  const days=['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
+  const months=['Ιαν','Φεβ','Μαρ','Απρ','Μαϊ','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'];
+  document.getElementById('today-date').textContent=`${days[dow]}, ${now.getDate()} ${months[now.getMonth()]}`;
+  document.getElementById('greeting').textContent=h<12?'Καλημέρα 👋':h<17?'Καλό απόγευμα 👋':'Καλησπέρα 👋';
+
+  const nm=nowMins();
+  let curMeal=null, nextMeal=null;
+  for(let i=0;i<MEALS.length;i++){
+    if(nm>=toMins(MEALS[i].time)&&nm<=toMins(MEALS[i].end)){curMeal=MEALS[i];nextMeal=MEALS[i+1]||null;break}
+    if(nm<toMins(MEALS[i].time)){nextMeal=MEALS[i];break}
+  }
+
+  const ca=document.getElementById('cur-meal-area'), na=document.getElementById('next-meal-area');
+  if(curMeal){
+    const eaten=getEaten(), alreadyAte=eaten.includes(curMeal.id);
+    ca.innerHTML=`<div class="cur-meal"><div class="meal-badge">🍽 ΩΡΑΣ ΦΑΓΗΤΟΥ</div><div class="cur-meal-name">${curMeal.icon} ${curMeal.name}</div><ul class="foods-ul">${curMeal.foods.map(f=>`<li>${f}</li>`).join('')}</ul><div class="macros"><div class="mc"><span>${curMeal.kcal}</span> kcal</div><div class="mc"><span>${curMeal.prot}g</span> πρωτεΐνη</div></div>${alreadyAte?`<div style="margin-top:14px;text-align:center;background:rgba(48,209,88,.12);border:1.5px solid rgba(48,209,88,.3);border-radius:12px;padding:12px;color:var(--green);font-weight:700;font-size:15px">✓ Καταγράφηκε — alarm set για επόμενο γεύμα</div>`:`<button onclick="ateMeal('${curMeal.id}')" style="margin-top:14px;display:block;width:100%;padding:14px;border:none;border-radius:12px;background:var(--green);color:#fff;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer">Έφαγα ✓ → Alarm για επόμενο</button>`}</div>`;
+    na.innerHTML=nextMeal?`<div class="next-card"><div class="next-icon">${nextMeal.icon}</div><div class="next-info"><div class="next-lbl">Επόμενο γεύμα</div><div class="next-name">${nextMeal.name}</div></div><div class="next-time">${nextMeal.time}</div></div>`:'';
+  } else if(nextMeal){
+    ca.innerHTML=`<div class="next-card" style="background:var(--card2);border-radius:16px;padding:20px;margin-bottom:8px"><div class="next-icon" style="font-size:36px">${nextMeal.icon}</div><div class="next-info"><div class="next-lbl">Επόμενο γεύμα</div><div class="next-name" style="font-size:20px">${nextMeal.name}</div><div style="font-size:12px;color:var(--text3);margin-top:4px">${nextMeal.foods.join(' · ')}</div></div></div>`;
+    na.innerHTML=`<div style="text-align:center;color:var(--text3);font-size:14px;padding:0 0 8px">στις <strong style="color:var(--text)">${nextMeal.time}</strong></div>`;
+  } else {
+    ca.innerHTML=`<div style="background:var(--card);border-radius:16px;padding:24px;text-align:center;margin-bottom:8px"><div style="font-size:40px;margin-bottom:8px">🌙</div><div style="font-size:18px;font-weight:700">Τελείωσες για σήμερα!</div><div style="font-size:14px;color:var(--text3);margin-top:4px">Ύπνος πριν 23:30 ✓</div></div>`;
+    na.innerHTML='';
+  }
+
+  renderStreak();
+  renderQuickLog();
+
+  const s=getSettings();
+  const woKey=s.days[dow]==='off'?null:s.days[dow];
+  const wa=document.getElementById('today-workout-area');
+  const kcalEl=document.getElementById('kcal-t');if(kcalEl)kcalEl.textContent=woKey?'~1650':'~1450';
+
+  if(woKey){
+    const w=WO[woKey];
+    wa.innerHTML=`<div style="background:linear-gradient(135deg,${w.color}22,${w.color}08);border:1.5px solid ${w.color}44;border-radius:20px;padding:20px;margin-bottom:8px;cursor:pointer" onclick="nav('gym');selWorkout('${woKey}')">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="font-size:32px">💪</div><div><div style="font-size:24px;font-weight:900;color:${w.color}">${w.name}</div><div style="font-size:12px;color:var(--text3)">${w.sub}</div></div></div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:14px">${w.ex.slice(0,3).map(e=>`• ${e.el}`).join('<br>')}${w.ex.length>3?`<br><span style="color:var(--text3)">+ ${w.ex.length-3} ακόμα</span>`:''}</div>
+      <div style="background:${w.color};border-radius:10px;padding:12px;text-align:center;font-size:15px;font-weight:800;color:#fff">Ξεκίνα την προπόνηση →</div>
+    </div>`;
+  } else {
+    wa.innerHTML=`<div style="background:var(--card);border-radius:16px;padding:24px;text-align:center;margin-bottom:8px"><div style="font-size:40px;margin-bottom:8px">🛋</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">Μέρα ξεκούρασης</div><div style="font-size:14px;color:var(--text3)">Βήματα ≥10.000 · Νερό 2.5L<br>Ύπνος πριν 23:30</div></div>`;
+  }
+}
+
+// ─── GYM ─────────────────────────────────────────────
+function initGym(){
+  const sel=document.getElementById('day-sel');
+  sel.innerHTML=Object.values(WO).map(w=>`<button class="day-btn" data-k="${w.key}" onclick="selWorkout('${w.key}')" style="color:${w.color}"><span class="db-name">${w.name}</span><span class="db-day">${w.dayN}</span><span class="db-sub">${w.sub.split(' · ').slice(0,2).join('/')}</span></button>`).join('');
+  const today=new Date().getDay();
+  const s=getSettings();
+  const auto=s.days[today]&&s.days[today]!=='off'?s.days[today]:'push';
+  selWorkout(auto);
+}
+
+function selWorkout(key){
+  selWo=key; done.clear();
+  document.querySelectorAll('.day-btn').forEach(b=>b.classList.toggle('active',b.dataset.k===key));
+  const w=WO[key];
+  const prog=getWoProg();
+  // restore done set from memory
+  Object.entries(prog).forEach(([i,v])=>{if(v.si>=w.ex[i]?.sets)done.add(Number(i))});
+  const totalDone=done.size, totalEx=w.ex.length;
+  document.getElementById('workout-content').innerHTML=`
+    <div style="padding:0 16px 8px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px;color:var(--text3)">${w.ex.length} ασκήσεις · ~55 λεπτά</div>
+      ${totalDone>0?`<div style="font-size:12px;color:var(--green);font-weight:700">${totalDone}/${totalEx} ✓</div>`:`<div style="font-size:12px;color:var(--text3)">⭐ = Προτεραιότητα</div>`}
+    </div>
+    <div class="ex-list">${w.ex.map((e,i)=>{
+      const s=prog[i]||{si:0};
+      const isDone=s.si>=e.sets;
+      const inProg=s.si>0&&!isDone;
+      const detailTxt=isDone
+        ?`<span style="color:var(--green);font-weight:700">✓ Ολοκληρώθηκε</span>`
+        :inProg
+          ?`<span style="color:var(--accent);font-weight:700">${s.si}/${e.sets} σετ ✓</span> · ${e.reps} · ${e.rest}″`
+          :`${e.sets} σετ × ${e.reps} · ${e.rest}″ rest`;
+      return`<div class="ex-item${e.star?' priority':''}${isDone?' completed':''}" id="ei${i}" onclick="openPlayer(${i})">
+        <div class="ex-num${isDone?' done':''}" id="en${i}">${isDone?'✓':i+1}</div>
+        <div class="ex-info">
+          <div class="ex-name">${e.el}${e.star?' <span style="color:var(--accent);font-size:11px">⭐</span>':''}</div>
+          <div class="ex-detail">${detailTxt}</div>
+        </div>
+        <div class="ex-chev">›</div>
+      </div>`;
+    }).join('')}
+    </div>
+    <div style="padding:16px">
+      <div class="card" style="padding:16px">
+        <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Κανόνες</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.9">
+          🎯 Τελευταίο σετ = 1–2 reps πριν failure<br>
+          ⏱ 90″ rest στα compound · 60″ στα isolation<br>
+          📈 Κάθε εβδομάδα: +1 rep ή +2.5kg<br>
+          ⚡ Πρώτη άσκηση = πιο σημαντική — ποτέ δεν κόβεται
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── WORKOUT MEMORY ──────────────────────────────────
+function woProgKey(){return`fp_wo_${new Date().toDateString()}_${selWo}`}
+function getWoProg(){try{return JSON.parse(localStorage.getItem(woProgKey()))||{}}catch{return{}}}
+function saveWoProg(ei,si){
+  const p=getWoProg();
+  p[ei]={si};
+  localStorage.setItem(woProgKey(),JSON.stringify(p));
+}
+
+// ─── PLAYER ──────────────────────────────────────────
+function openPlayer(ei){
+  const saved=getWoProg()[ei]||{si:0};
+  ps={wo:selWo,ei,si:saved.si,resting:false,rint:null};
+  const e=WO[selWo].ex[ei];
+  document.getElementById('p-name').textContent=e.el;
+  document.getElementById('p-sub').textContent=e.en;
+  document.getElementById('p-cue').textContent=e.cue;
+  document.getElementById('yt-link').href='#';
+  document.getElementById('yt-link').onclick=(ev)=>{ev.preventDefault();openVid(e.el,e.yt)};
+  document.getElementById('yt-link').querySelector('span:last-child').textContent='YouTube tutorial →';
+  // Reset demo section then fetch
+  const di=document.getElementById('ex-demo-inner');
+  di.style.cssText='color:var(--text3);font-size:13px;padding:20px';
+  di.textContent='Φορτώνει demo...';
+  fetchExDemo(e.en);
+  updatePlayer();
+  document.getElementById('player').classList.add('show');
+}
+
+function updatePlayer(){
+  const w=WO[ps.wo], e=w.ex[ps.ei];
+  document.getElementById('p-prog').style.width=(ps.ei/w.ex.length*100)+'%';
+
+  // Dots
+  document.getElementById('set-dots').innerHTML=Array.from({length:e.sets},(_,i)=>`<div class="sd${i<ps.si?' done':i===ps.si?' cur':''}"></div>`).join('');
+
+  const sa=document.getElementById('set-area'), ra=document.getElementById('rest-area');
+  const sb=document.getElementById('set-btn'), nb=document.getElementById('next-btn');
+
+  if(ps.resting){
+    sa.style.display='none'; ra.classList.add('show');
+    sb.style.display='none'; nb.style.display='none';
+  } else if(ps.si>=e.sets){
+    sa.style.display='block'; ra.classList.remove('show');
+    document.getElementById('set-lbl').textContent='Όλα τα σετ ✓';
+    document.getElementById('set-big').textContent='✓';
+    document.getElementById('set-reps').textContent='';
+    sb.style.display='none'; nb.style.display='block';
+  } else {
+    sa.style.display='block'; ra.classList.remove('show');
+    document.getElementById('set-lbl').textContent=`Σετ ${ps.si+1} από ${e.sets}`;
+    document.getElementById('set-big').textContent=ps.si+1;
+    document.getElementById('set-reps').textContent=e.reps+' επαναλήψεις';
+    sb.style.display='block'; nb.style.display='none';
+  }
+}
+
+function doSet(){
+  if(ps.resting) return;
+  const e=WO[ps.wo].ex[ps.ei];
+  ps.si++;
+  saveWoProg(ps.ei,ps.si);
+  if(ps.si<e.sets){startRest(e.rest)}
+  else{updatePlayer();markDone(ps.ei);toast('Άσκηση ✓ 💪');vib([100,50,100])}
+}
+
+function startRest(secs){
+  ps.resting=true; let rem=secs;
+  const circ=427, ring=document.getElementById('rr-fill');
+  ring.style.strokeDashoffset=0;
+  document.getElementById('rest-secs').textContent=rem;
+  updatePlayer();
+  ps.rint=setInterval(()=>{
+    rem--;
+    document.getElementById('rest-secs').textContent=rem;
+    ring.style.strokeDashoffset=circ*(1-rem/secs);
+    if(rem<=0){clearInterval(ps.rint);ps.resting=false;playRestDone();vib([200,100,200,100,200]);updatePlayer()}
+  },1000);
+}
+
+function skipRest(){clearInterval(ps.rint);ps.resting=false;updatePlayer()}
+
+function nextEx(){
+  const w=WO[ps.wo];
+  if(ps.ei<w.ex.length-1){
+    ps.ei++;ps.si=0;ps.resting=false;clearInterval(ps.rint);
+    const e=w.ex[ps.ei];
+    document.getElementById('p-name').textContent=e.el;
+    document.getElementById('p-sub').textContent=e.en;
+    document.getElementById('p-cue').textContent=e.cue;
+    document.getElementById('yt-link').href='#';
+    document.getElementById('yt-link').onclick=(ev)=>{ev.preventDefault();openVid(e.el,e.yt)};
+    document.getElementById('yt-link').querySelector('span:last-child').textContent='YouTube tutorial →';
+    const di=document.getElementById('ex-demo-inner');
+    di.style.cssText='color:var(--text3);font-size:13px;padding:20px';
+    di.textContent='Φορτώνει demo...';
+    fetchExDemo(e.en);
+    document.getElementById('pbody').scrollTop=0;
+    updatePlayer();
+  } else {showWorkoutDone()}
+}
+
+function showWorkoutDone(){
+  logWorkout(ps.wo);
+  // Find next meal to eat (post-workout or whatever is next)
+  const nm=nowMins();
+  let nextM=MEALS.find(m=>toMins(m.time)>nm)||MEALS.find(m=>m.id==='post');
+  document.getElementById('done-meal-name').textContent=`${nextM.icon} ${nextM.name}`;
+  document.getElementById('done-meal-foods').innerHTML=nextM.foods.map(f=>`→ ${f}`).join('<br>');
+  document.getElementById('done-meal-macros').textContent=`${nextM.kcal} kcal · ${nextM.prot}g πρωτεΐνη`;
+  // Transform player to done state
+  document.getElementById('p-name').textContent='Προπόνηση Τελείωσε!';
+  document.getElementById('p-sub').textContent='Εξαιρετική δουλειά 🏆';
+  document.getElementById('p-prog').style.width='100%';
+  document.getElementById('set-dots').style.display='none';
+  document.getElementById('set-area').style.display='none';
+  document.getElementById('rest-area').classList.remove('show');
+  document.querySelector('.cue-card').style.display='none';
+  document.getElementById('yt-link').style.display='none';
+  document.getElementById('done-screen').style.display='block';
+  document.getElementById('set-btn').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+  document.getElementById('done-btn').style.display='block';
+  document.getElementById('pbody').scrollTop=0;
+  vib([100,50,100,50,100,50,300]);
+  // Schedule alarm for next meal if it hasn't passed yet
+  scheduleNextMealAlarm(nextM);
+}
+
+function closeDone(){
+  closePlayer();
+  nav('today');
+}
+
+function resetCurrentEx(){
+  ps.resting=false;
+  clearInterval(ps.rint);
+  ps.si=0;
+  const p=getWoProg();
+  delete p[ps.ei];
+  localStorage.setItem(woProgKey(),JSON.stringify(p));
+  // unmark from exercise list
+  const n=document.getElementById('en'+ps.ei);
+  const it=document.getElementById('ei'+ps.ei);
+  if(n){n.textContent=ps.ei+1;n.classList.remove('done')}
+  if(it){it.classList.remove('completed')}
+  updatePlayer();
+  toast('↺ Reset — ξανά από Σετ 1');
+}
+
+function closePlayer(){
+  clearInterval(ps.rint);
+  // Reset done screen state
+  document.getElementById('done-screen').style.display='none';
+  document.getElementById('set-dots').style.display='';
+  document.getElementById('set-area').style.display='';
+  document.querySelector('.cue-card').style.display='';
+  document.getElementById('yt-link').style.display='';
+  document.getElementById('done-btn').style.display='none';
+  document.getElementById('player').classList.remove('show');
+  selWorkout(selWo);
+}
+function markDone(i){done.add(i);const n=document.getElementById('en'+i),it=document.getElementById('ei'+i);if(n){n.textContent='✓';n.classList.add('done')}if(it)it.classList.add('completed')}
+
+// ─── FOOD ────────────────────────────────────────────
+function renderFood(){
+  const nm=nowMins();
+  document.getElementById('meals-list').innerHTML=MEALS.map(m=>{
+    const cur=nm>=toMins(m.time)&&nm<=toMins(m.end);
+    return `<div class="meal-card${cur?' now':''}">
+      <div class="mch">
+        <div class="meal-emoji">${m.icon}</div>
+        <div class="meal-info">
+          <div class="meal-name">${m.name}${cur?' <span style="background:var(--accent);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px">ΤΩΡΑ</span>':''}</div>
+          <div class="meal-time-t">${m.time}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">${MEAL_SRC[m.id].icon} ${MEAL_SRC[m.id].label}</div>
+        </div>
+        <div class="meal-kcal-box"><div class="meal-kcal-n">${m.kcal}</div><div class="meal-prot">${m.prot}g πρωτ.</div></div>
+      </div>
+      <div class="meal-det">${m.foods.map(f=>`<div class="mf-item"><span style="color:var(--accent)">→</span><span>${f}</span></div>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── TRACK ───────────────────────────────────────────
+function renderTrack(){
+  renderWoCal();
+  const log=getLog();
+  const hist=document.getElementById('log-hist'), avg=document.getElementById('avg-area');
+  if(!log.length){hist.innerHTML='<div class="empty-log">Δεν υπάρχουν μετρήσεις ακόμα</div>';avg.innerHTML='';return}
+  const last7=log.slice(-7).filter(e=>e.w);
+  if(last7.length){
+    const avgW=(last7.reduce((s,e)=>s+(e.w||0),0)/last7.length).toFixed(1);
+    const diff=(avgW-68.5).toFixed(1);
+    avg.innerHTML=`<div class="card" style="padding:16px;display:flex;gap:8px">
+      <div style="flex:1;text-align:center"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Μ.Ο. 7 ημ.</div><div style="font-size:30px;font-weight:900;color:var(--accent)">${avgW}</div><div style="font-size:11px;color:var(--text3)">kg</div></div>
+      <div style="flex:1;text-align:center"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Στόχος</div><div style="font-size:30px;font-weight:900;color:var(--text3)">68.5</div><div style="font-size:11px;color:var(--text3)">kg</div></div>
+      <div style="flex:1;text-align:center"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Απόσταση</div><div style="font-size:30px;font-weight:900;color:${diff>0?'var(--red)':'var(--green)'}">${diff>0?'+':''}${diff}</div><div style="font-size:11px;color:var(--text3)">kg</div></div>
+    </div>`;
+  }
+  hist.innerHTML=log.slice().reverse().slice(0,20).map(e=>`<div class="log-row"><span class="log-date">${e.date}</span><span class="log-w">${e.w?e.w+' kg':'–'}</span><span class="log-m">${e.m?e.m+' cm':'–'}</span></div>`).join('')||'<div class="empty-log">–</div>';
+}
+
+function saveLog(){
+  const w=parseFloat(document.getElementById('w-in').value)||null;
+  const m=parseFloat(document.getElementById('m-in').value)||null;
+  if(!w&&!m){toast('Βάλε τουλάχιστον ένα νούμερο');return}
+  const today=new Date().toLocaleDateString('el-GR',{day:'2-digit',month:'2-digit'});
+  const log=getLog();
+  const idx=log.findIndex(e=>e.date===today);
+  if(idx>=0)log[idx]={date:today,w,m};else log.push({date:today,w,m});
+  const json=JSON.stringify(log);
+  try{
+    localStorage.setItem('fp_log',json);
+    // backup copy με timestamp για recovery
+    localStorage.setItem('fp_log_bak',json);
+  }catch(e){toast('⚠️ Storage full — εξήγαγε τα data')}
+  document.getElementById('w-in').value='';
+  document.getElementById('m-in').value='';
+  renderTrack();toast(`✓ ${today}${w?' · '+w+'kg':''}${m?' · '+m+'cm':''}`);
+}
+
+function getLog(){
+  try{
+    const raw=localStorage.getItem('fp_log');
+    if(raw) return JSON.parse(raw)||[];
+    // recovery από backup αν χάθηκε το primary
+    const bak=localStorage.getItem('fp_log_bak');
+    if(bak){
+      const data=JSON.parse(bak)||[];
+      if(data.length){localStorage.setItem('fp_log',bak);return data}
+    }
+    return[];
+  }catch{return[]}
+}
+
+function exportData(){
+  const data={log:getLog(),exported:new Date().toISOString()};
+  const txt=JSON.stringify(data,null,2);
+  // copy to clipboard
+  navigator.clipboard?.writeText(txt).then(()=>toast('✓ Data αντιγράφηκαν στο clipboard'))
+    .catch(()=>{
+      // fallback: show in alert
+      prompt('Αντίγραψε τα data σου (Ctrl+A, Ctrl+C):',txt);
+    });
+}
+
+function importData(){
+  const raw=prompt('Επικόλλησε τα data σου (JSON από export):');
+  if(!raw)return;
+  try{
+    const data=JSON.parse(raw);
+    const log=data.log||data; // support both formats
+    if(!Array.isArray(log))throw new Error();
+    localStorage.setItem('fp_log',JSON.stringify(log));
+    localStorage.setItem('fp_log_bak',JSON.stringify(log));
+    renderTrack();toast(`✓ Import OK — ${log.length} εγγραφές`);
+  }catch{toast('❌ Λάθος format')}
+}
+
+// ─── AUDIO ALARM ─────────────────────────────────────
+let audioCtx=null;
+function getACtx(){
+  if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)()}
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+function playBeep(freq=880,dur=0.25,vol=0.4,delay=0){
+  const ctx=getACtx(), osc=ctx.createOscillator(), gain=ctx.createGain();
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.type='sine';osc.frequency.setValueAtTime(freq,ctx.currentTime+delay);
+  gain.gain.setValueAtTime(0,ctx.currentTime+delay);
+  gain.gain.linearRampToValueAtTime(vol,ctx.currentTime+delay+0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+dur);
+  osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+dur+0.05);
+}
+function playMealAlarm(){
+  // 3 ascending beeps
+  playBeep(660,0.2,0.35,0);
+  playBeep(780,0.2,0.35,0.28);
+  playBeep(990,0.35,0.4,0.56);
+}
+function playRestDone(){
+  // 2 quick beeps
+  playBeep(880,0.15,0.3,0);
+  playBeep(880,0.15,0.3,0.22);
+}
+// Unlock audio on first user interaction (iOS requirement)
+document.addEventListener('touchstart',()=>getACtx(),{once:true});
+document.addEventListener('click',()=>getACtx(),{once:true});
+
+// ─── NOTIFICATIONS ───────────────────────────────────
+function notifPermStatus(){return'Notification'in window?Notification.permission:'unsupported'}
+
+async function askNotifPermission(){
+  if(!('Notification'in window)){toast('Ο browser δεν υποστηρίζει notifications');return}
+  const r=await Notification.requestPermission();
+  updateNotifBanner();
+  if(r==='granted')toast('Notifications ενεργά ✓ 🔔');
+  else toast('Notifications απορρίφθηκαν');
+}
+
+function sendNotif(title,body){
+  if(notifPermStatus()==='granted'){
+    try{new Notification(title,{body,icon:'',silent:false})}catch(e){}
+  }
+}
+
+function updateNotifBanner(){
+  const b=document.getElementById('notif-banner');
+  if(!b)return;
+  const s=notifPermStatus();
+  if(s==='granted'){b.style.display='none'}
+  else if(s==='denied'){b.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🔕</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Notifications μπλοκαρισμένα</div><div style="font-size:11px;color:var(--text3)">Άνοιξε Settings → Site Settings για να τα ενεργοποιήσεις</div></div></div>`;b.style.display='block'}
+  else{b.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">🔔</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Ενεργοποίησε Notifications</div><div style="font-size:11px;color:var(--text3)">Για alarm κάθε γεύμα (όταν το app είναι ανοιχτό)</div></div><button onclick="askNotifPermission()" style="background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:inherit;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer">Ενεργ.</button></div>`;b.style.display='block'}
+}
+
+// ─── MEAL ALERT ──────────────────────────────────────
+function checkAlert(){
+  const nm=nowMins();
+  for(const m of MEALS){
+    const mt=toMins(m.time), key=m.id+new Date().toDateString();
+    if(Math.abs(nm-mt)<=1&&lastAlert!==key){
+      lastAlert=key;
+      // In-app banner
+      document.getElementById('al-icon').textContent=m.icon;
+      document.getElementById('al-name').textContent=m.name;
+      document.getElementById('al-foods').innerHTML=m.foods.map(f=>`→ ${f}`).join('<br>');
+      document.getElementById('meal-alert').classList.add('show');
+      setTimeout(hideAlert,12000);
+      // Sound alarm
+      playMealAlarm();
+      vib([300,100,300,100,500]);
+      // System notification
+      sendNotif(`${m.icon} Ώρα φαγητού — ${m.name}`,m.foods.join(' · '));
+      break;
+    }
+  }
+}
+function hideAlert(){document.getElementById('meal-alert').classList.remove('show')}
+
+// ─── TOAST ───────────────────────────────────────────
+let tto=null;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tto);tto=setTimeout(()=>t.classList.remove('show'),2800)}
+function vib(p){if(navigator.vibrate)navigator.vibrate(p)}
+
+// ─── ATE MEAL FLOW ───────────────────────────────────
+function getEaten(){try{return JSON.parse(localStorage.getItem('fp_ate_'+new Date().toDateString()))||[]}catch{return[]}}
+
+function scheduleNextMealAlarm(meal){
+  const now=new Date(), [h,m]=meal.time.split(':').map(Number);
+  const target=new Date(now); target.setHours(h,m,0,0);
+  const delay=target-now;
+  if(delay>0&&delay<86400000){
+    setTimeout(()=>{
+      playMealAlarm();
+      vib([300,100,300,100,500]);
+      sendNotif(`${meal.icon} Ώρα φαγητού!`,`${meal.name}: ${meal.foods.join(' · ')}`);
+      document.getElementById('al-icon').textContent=meal.icon;
+      document.getElementById('al-name').textContent=meal.name;
+      document.getElementById('al-foods').innerHTML=meal.foods.map(f=>`→ ${f}`).join('<br>');
+      document.getElementById('meal-alert').classList.add('show');
+      setTimeout(hideAlert,15000);
+      if(curPage==='today')renderToday();
+    },delay);
+  }
+}
+
+function ateMeal(mealId){
+  const eaten=getEaten();
+  if(!eaten.includes(mealId)){eaten.push(mealId);localStorage.setItem('fp_ate_'+new Date().toDateString(),JSON.stringify(eaten))}
+  const idx=MEALS.findIndex(m=>m.id===mealId);
+  const next=MEALS[idx+1];
+  if(next){
+    scheduleNextMealAlarm(next);
+    const now=new Date(), [h,m]=next.time.split(':').map(Number);
+    const target=new Date(now); target.setHours(h,m,0,0);
+    const diffMins=Math.round((target-now)/60000);
+    const diffTxt=diffMins>90?`${Math.round(diffMins/60)} ώρες`:`${diffMins} λεπτά`;
+    toast(`✓ Ωραία! Επόμενο: ${next.name} στις ${next.time} (σε ${diffTxt})`);
+  } else {
+    toast('Τελείωσες για σήμερα! Ύπνος πριν 23:30 🌙');
+  }
+  renderToday();
+  renderQuickLog();
+  renderStreak();
+}
+
+// ─── WORKOUT CALENDAR ────────────────────────────────
+function getWoLog(){try{return JSON.parse(localStorage.getItem('fp_wo_log'))||[];}catch{return[]}}
+
+function logWorkout(type){
+  const log=getWoLog();
+  const today=new Date().toISOString().split('T')[0];
+  if(!log.find(e=>e.date===today)){
+    log.push({date:today,type});
+    localStorage.setItem('fp_wo_log',JSON.stringify(log));
+  }
+}
+
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+const WO_COLORS={push:'#FF6B35',pull:'#0a84ff',legs:'#30d158'};
+const WO_LABELS={push:'PUSH',pull:'PULL',legs:'ΠΟΔΙΑ'};
+
+function renderWoCal(){
+  const log=getWoLog();
+  const logMap={};
+  log.forEach(e=>{logMap[e.date]=e.type});
+
+  const now=new Date();
+  const today=now.toISOString().split('T')[0];
+
+  // week starts Monday
+  const dow=now.getDay();
+  const wkStart=new Date(now);
+  wkStart.setDate(now.getDate()-(dow===0?6:dow-1));
+  const wkStr=wkStart.toISOString().split('T')[0];
+  const moStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+  const yrStr=`${now.getFullYear()}-01-01`;
+
+  const wk=log.filter(e=>e.date>=wkStr).length;
+  const mo=log.filter(e=>e.date>=moStr).length;
+  const yr=log.filter(e=>e.date>=yrStr).length;
+  const tot=log.length;
+
+  const MONTHS=['Ιανουάριος','Φεβρουάριος','Μάρτιος','Απρίλιος','Μάιος','Ιούνιος','Ιούλιος','Αύγουστος','Σεπτέμβριος','Οκτώβριος','Νοέμβριος','Δεκέμβριος'];
+  const DAYS=['Δ','Τ','Τ','Π','Π','Σ','Κ'];
+
+  const firstDow=new Date(calYear,calMonth,1).getDay();
+  // shift so week starts Monday (0=Mon)
+  const offset=(firstDow===0?6:firstDow-1);
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+
+  let cells='';
+  for(let i=0;i<offset;i++) cells+=`<div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const wo=logMap[ds];
+    const isToday=ds===today;
+    const col=wo?WO_COLORS[wo]:null;
+    cells+=`<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 0">
+      <div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:${isToday?900:400};color:${isToday?'#fff':'var(--text)'};background:${isToday?'var(--accent)':'transparent'}">${d}</div>
+      <div style="width:7px;height:7px;border-radius:50%;background:${col||'transparent'}"></div>
+    </div>`;
+  }
+
+  document.getElementById('wo-cal-area').innerHTML=`
+    <div style="background:var(--card);border-radius:16px;padding:16px;margin-bottom:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+        ${[['Εβδομάδα',wk],['Μήνας',mo],['Φέτος',yr],['Σύνολο',tot]].map(([l,v])=>`
+          <div style="text-align:center;background:var(--card2);border-radius:10px;padding:10px 4px">
+            <div style="font-size:24px;font-weight:900;color:var(--accent)">${v}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${l}</div>
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <button onclick="calNav(-1)" style="background:var(--card2);border:none;border-radius:8px;width:34px;height:34px;color:var(--text);font-size:18px;cursor:pointer">‹</button>
+        <div style="font-size:15px;font-weight:700">${MONTHS[calMonth]} ${calYear}</div>
+        <button onclick="calNav(1)" style="background:var(--card2);border:none;border-radius:8px;width:34px;height:34px;color:var(--text);font-size:18px;cursor:pointer">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px">
+        ${DAYS.map(d=>`<div style="text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:2px 0">${d}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+        ${cells}
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;justify-content:center">
+        ${Object.entries(WO_LABELS).map(([k,l])=>`<div style="display:flex;align-items:center;gap:5px"><div style="width:9px;height:9px;border-radius:50%;background:${WO_COLORS[k]}"></div><span style="font-size:11px;color:var(--text3)">${l}</span></div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function calNav(dir){
+  calMonth+=dir;
+  if(calMonth<0){calMonth=11;calYear--}
+  if(calMonth>11){calMonth=0;calYear++}
+  renderWoCal();
+}
+
+// ─── PREP GUIDE ──────────────────────────────────────
+let prepStep=0, prepTimerInt=null, prepTimerSec=0, prepTimerRunning=false;
+
+function openPrep(){
+  prepStep=0;
+  clearInterval(prepTimerInt);
+  prepTimerRunning=false;
+  document.getElementById('prep-guide').classList.add('show');
+  renderPrepStep();
+}
+function closePrep(){
+  clearInterval(prepTimerInt);
+  prepTimerRunning=false;
+  document.getElementById('prep-guide').classList.remove('show');
+}
+function renderPrepStep(){
+  const s=PREP_STEPS[prepStep];
+  const total=PREP_STEPS.length;
+  const pct=Math.round((prepStep/total)*100);
+  document.getElementById('pg-fill').style.width=pct+'%';
+  document.getElementById('pg-num').textContent=(prepStep+1)+' / '+total;
+
+  document.getElementById('pg-body').innerHTML=`
+    <div class="pg-emoji">${s.emoji}</div>
+    <div class="pg-title">${s.title}</div>
+    <div class="pg-desc">${s.desc}</div>
+    ${s.timer?`<div class="pg-timer-wrap"><div class="pg-timer-num" id="pg-timer-num">${fmtTimer(s.timer)}</div><div class="pg-timer-lbl" id="pg-timer-lbl">πάτα για να ξεκινήσεις</div></div>`:''}
+  `;
+
+  const mainBtn=document.getElementById('pg-btn');
+  const timerBtn=document.getElementById('pg-timer-btn');
+  if(s.final){
+    mainBtn.textContent='🎉 Τέλεια — Κλείσιμο';
+    mainBtn.style.background='var(--accent)';
+  } else {
+    mainBtn.textContent='Έτοιμο ✓';
+    mainBtn.style.background='';
+  }
+
+  if(s.timer){
+    prepTimerSec=s.timer;
+    prepTimerRunning=false;
+    timerBtn.style.display='block';
+    timerBtn.textContent='▶ Ξεκίνα Timer ('+fmtTimer(s.timer)+')';
+  } else {
+    timerBtn.style.display='none';
+  }
+}
+function fmtTimer(sec){
+  const m=Math.floor(sec/60), s=sec%60;
+  return m+':'+(s<10?'0':'')+s;
+}
+function startPrepTimer(){
+  if(prepTimerRunning) return;
+  prepTimerRunning=true;
+  const timerBtn=document.getElementById('pg-timer-btn');
+  timerBtn.style.display='none';
+  clearInterval(prepTimerInt);
+  prepTimerInt=setInterval(()=>{
+    prepTimerSec--;
+    const el=document.getElementById('pg-timer-num');
+    const lbl=document.getElementById('pg-timer-lbl');
+    if(el) el.textContent=fmtTimer(Math.max(0,prepTimerSec));
+    if(prepTimerSec<=0){
+      clearInterval(prepTimerInt);
+      prepTimerRunning=false;
+      if(lbl) lbl.textContent='✓ Έτοιμο!';
+      if(el) el.style.color='var(--accent)';
+      playBeep();
+    }
+  },1000);
+}
+function nextPrepStep(){
+  clearInterval(prepTimerInt);
+  prepTimerRunning=false;
+  if(PREP_STEPS[prepStep].final){closePrep();toast('🎉 Εβδομαδιαίο meal prep ολοκληρώθηκε!');return}
+  prepStep++;
+  renderPrepStep();
+  // micro-animation
+  const body=document.getElementById('pg-body');
+  body.style.opacity='0';body.style.transform='translateX(40px)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    body.style.transition='opacity .3s ease,transform .3s ease';
+    body.style.opacity='1';body.style.transform='translateX(0)';
+  }));
+}
+
+// ─── SETTINGS ────────────────────────────────────────
+const DEFAULT_SETTINGS={gymTime:'07:30',days:{'0':'off','1':'off','2':'off','3':'off','4':'push','5':'pull','6':'legs'}};
+const DAY_NAMES=['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
+
+function getSettings(){
+  try{const s=JSON.parse(localStorage.getItem('fp_settings'));return s?{...DEFAULT_SETTINGS,...s,days:{...DEFAULT_SETTINGS.days,...s.days}}:DEFAULT_SETTINGS}
+  catch{return DEFAULT_SETTINGS}
+}
+
+function renderSettings(){
+  const s=getSettings();
+  document.getElementById('gym-time-input').value=s.gymTime;
+  document.getElementById('days-editor').innerHTML=DAY_NAMES.map((name,i)=>`
+    <div style="display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--sep)">
+      <div style="flex:1;font-size:15px;font-weight:600">${name}</div>
+      <select data-day="${i}" style="background:var(--card2);border:none;border-radius:8px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:14px;font-weight:600">
+        <option value="off" ${s.days[i]==='off'?'selected':''}>Ανάπαυση</option>
+        <option value="push" ${s.days[i]==='push'?'selected':''}>PUSH</option>
+        <option value="pull" ${s.days[i]==='pull'?'selected':''}>PULL</option>
+        <option value="legs" ${s.days[i]==='legs'?'selected':''}>ΠΟΔΙΑ</option>
+      </select>
+    </div>`).join('');
+}
+
+function saveSettings(){
+  const days={};
+  document.querySelectorAll('#days-editor select').forEach(sel=>{days[sel.dataset.day]=sel.value});
+  const gymTime=document.getElementById('gym-time-input').value;
+  localStorage.setItem('fp_settings',JSON.stringify({gymTime,days}));
+  toast('✓ Ρυθμίσεις αποθηκεύτηκαν');
+  renderToday();
+}
+
+// ─── EXERCISE DEMO ────────────────────────────────────
+const demoCache={};
+// Hardcoded wger.de base IDs for the exercises in this app (search endpoint requires auth)
+const WGER_IDS={
+  'Cable Lateral Raise':1378,
+  'Lat Pulldown Wide Grip':158,
+  'Incline Chest Press Machine':1655,
+  'Shoulder Press Machine':543,
+  'Triceps Pushdown Cable':1185,
+  'Nautilus Pullover Machine':1634,
+  'Chest-Supported Row':1283,
+  'Reverse Pec Deck':828,
+  'Biceps Curl Machine':1192,
+  'Hip Abduction Machine':1748,
+  'Leg Press High Wide':375,
+  'Seated Leg Curl':366,
+  'Leg Extension':369,
+  'Standing Calf Raise':622,
+  'Pec Deck / Πεταλούδα':135
+};
+
+async function fetchExDemo(name){
+  const el=document.getElementById('ex-demo-inner');
+  if(!el)return;
+  if(demoCache[name]){el.innerHTML=demoCache[name];el.style.cssText='display:flex;gap:0;padding:0;width:100%';return}
+  el.textContent='⏳ Φορτώνει demo...';
+  try{
+    const baseId=WGER_IDS[name];
+    if(!baseId)throw new Error('not found');
+    const ir=await fetch(`https://wger.de/api/v2/exerciseinfo/${baseId}/?format=json`);
+    const info=await ir.json();
+    const imgs=(info.images||[]).slice(0,2);
+    if(!imgs.length)throw new Error('no images');
+    const html=imgs.map(i=>`<img src="${i.image}" style="flex:1;width:50%;max-height:170px;object-fit:contain;background:#111" loading="lazy">`).join('');
+    demoCache[name]=html;
+    el.innerHTML=html;
+    el.style.cssText='display:flex;gap:0;padding:0;width:100%';
+  }catch(e){
+    el.innerHTML='<div style="padding:16px;font-size:13px;color:var(--text3);text-align:center">Demo δεν βρέθηκε</div>';
+  }
+}
+
+function openVid(name, ytQuery){
+  document.getElementById('vid-ex-name').textContent=name;
+  document.getElementById('vid-frame').src=`https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(ytQuery)}&rel=0&autoplay=1`;
+  document.getElementById('vid-overlay').style.display='flex';
+}
+function closeVid(){
+  document.getElementById('vid-frame').src='about:blank';
+  document.getElementById('vid-overlay').style.display='none';
+}
+
+// ─── INIT ────────────────────────────────────────────
+// Request persistent storage — prevents iOS/Safari from clearing data
+if(navigator.storage?.persist){
+  navigator.storage.persist().then(ok=>{
+    if(!ok)console.warn('Storage not persistent — data may be cleared by browser');
+  });
+}
+
+renderToday();renderFood();renderTrack();initGym();
+updateNotifBanner();
+setInterval(()=>{if(curPage==='today')renderToday();checkAlert()},60000);
+checkAlert();
+</script>
+</body>
+</html>
