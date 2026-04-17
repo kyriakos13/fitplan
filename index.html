@@ -265,6 +265,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
           <div class="ig"><label>📏 Μέση (cm)</label><input type="number" class="ti" id="m-in" placeholder="–" step="0.5" min="60" max="120"></div>
         </div>
         <button class="btn btn-primary" onclick="saveLog()">Αποθήκευση ✓</button>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="exportData()" style="flex:1;padding:10px;background:var(--card2);border:none;border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">📤 Export backup</button>
+          <button onclick="importData()" style="flex:1;padding:10px;background:var(--card2);border:none;border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">📥 Import</button>
+        </div>
       </div>
       <div id="avg-area" style="padding:0 16px 12px"></div>
       <div style="background:var(--card);border-radius:16px;margin:0 16px 12px;padding:16px">
@@ -691,13 +695,54 @@ function saveLog(){
   const log=getLog();
   const idx=log.findIndex(e=>e.date===today);
   if(idx>=0)log[idx]={date:today,w,m};else log.push({date:today,w,m});
-  localStorage.setItem('fp_log',JSON.stringify(log));
+  const json=JSON.stringify(log);
+  try{
+    localStorage.setItem('fp_log',json);
+    // backup copy με timestamp για recovery
+    localStorage.setItem('fp_log_bak',json);
+  }catch(e){toast('⚠️ Storage full — εξήγαγε τα data')}
   document.getElementById('w-in').value='';
   document.getElementById('m-in').value='';
-  renderTrack();toast('Αποθηκεύτηκε ✓');
+  renderTrack();toast(`✓ ${today}${w?' · '+w+'kg':''}${m?' · '+m+'cm':''}`);
 }
 
-function getLog(){try{return JSON.parse(localStorage.getItem('fp_log'))||[]}catch{return[]}}
+function getLog(){
+  try{
+    const raw=localStorage.getItem('fp_log');
+    if(raw) return JSON.parse(raw)||[];
+    // recovery από backup αν χάθηκε το primary
+    const bak=localStorage.getItem('fp_log_bak');
+    if(bak){
+      const data=JSON.parse(bak)||[];
+      if(data.length){localStorage.setItem('fp_log',bak);return data}
+    }
+    return[];
+  }catch{return[]}
+}
+
+function exportData(){
+  const data={log:getLog(),exported:new Date().toISOString()};
+  const txt=JSON.stringify(data,null,2);
+  // copy to clipboard
+  navigator.clipboard?.writeText(txt).then(()=>toast('✓ Data αντιγράφηκαν στο clipboard'))
+    .catch(()=>{
+      // fallback: show in alert
+      prompt('Αντίγραψε τα data σου (Ctrl+A, Ctrl+C):',txt);
+    });
+}
+
+function importData(){
+  const raw=prompt('Επικόλλησε τα data σου (JSON από export):');
+  if(!raw)return;
+  try{
+    const data=JSON.parse(raw);
+    const log=data.log||data; // support both formats
+    if(!Array.isArray(log))throw new Error();
+    localStorage.setItem('fp_log',JSON.stringify(log));
+    localStorage.setItem('fp_log_bak',JSON.stringify(log));
+    renderTrack();toast(`✓ Import OK — ${log.length} εγγραφές`);
+  }catch{toast('❌ Λάθος format')}
+}
 
 // ─── AUDIO ALARM ─────────────────────────────────────
 let audioCtx=null;
@@ -826,6 +871,13 @@ function ateMeal(mealId){
 }
 
 // ─── INIT ────────────────────────────────────────────
+// Request persistent storage — prevents iOS/Safari from clearing data
+if(navigator.storage?.persist){
+  navigator.storage.persist().then(ok=>{
+    if(!ok)console.warn('Storage not persistent — data may be cleared by browser');
+  });
+}
+
 renderToday();renderFood();renderTrack();initGym();
 updateNotifBanner();
 setInterval(()=>{if(curPage==='today')renderToday();checkAlert()},60000);
