@@ -139,6 +139,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
 
 .pfooter{padding:0 16px}
 
+/* ===== PREP GUIDE ===== */
+.prep-guide{position:fixed;inset:0;background:var(--bg);z-index:160;display:none;flex-direction:column;padding-top:var(--st);padding-bottom:calc(var(--sb)+16px)}
+.prep-guide.show{display:flex}
+.pg-head{padding:12px 16px;display:flex;align-items:center;gap:14px}
+.pg-bar{flex:1;height:6px;background:var(--card2);border-radius:3px;overflow:hidden}
+.pg-fill{height:100%;background:var(--green);border-radius:3px;transition:width .5s ease}
+.pg-num{font-size:12px;color:var(--text3);font-weight:700;white-space:nowrap}
+.pg-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;gap:0}
+.pg-emoji{font-size:82px;line-height:1;margin-bottom:20px}
+.pg-title{font-size:25px;font-weight:900;margin-bottom:14px;line-height:1.2;text-align:center}
+.pg-desc{font-size:15px;color:var(--text2);line-height:1.85;white-space:pre-line;background:var(--card);border-radius:14px;padding:16px 18px;width:100%;text-align:left}
+.pg-timer-wrap{margin-top:18px;width:100%;background:var(--card);border-radius:14px;padding:18px;text-align:center}
+.pg-timer-num{font-size:60px;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:-2px}
+.pg-timer-lbl{font-size:13px;color:var(--text3);margin-top:2px}
+.pg-foot{padding:16px 24px 0}
+
 /* ===== FOOD ===== */
 .food-header{padding:calc(var(--st) + 4px) 16px 12px}
 .food-title{font-size:28px;font-weight:800}
@@ -242,12 +258,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
             🔄 Γιαούρτι ↔ Cottage cheese
           </div>
           <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--sep)">
-            <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">BATCH COOK ΚΥΡΙΑΚΗ (30')</div>
-            <div style="font-size:14px;color:var(--text2);line-height:1.9">
-              🍗 1kg κοτόπουλο → φούρνος 200° / 25'<br>
-              🍚 400g ρύζι άβραστο → ρυζομάγειρας<br>
-              📦 → 4 tupperware × 160g κοτ + 150g ρύζι
-            </div>
+            <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📦 BATCH COOK ΚΥΡΙΑΚΗ — 4 Tupperware</div>
+            <button onclick="openPrep()" style="width:100%;background:linear-gradient(135deg,rgba(48,209,88,.2),rgba(48,209,88,.06));border:1.5px solid rgba(48,209,88,.4);border-radius:14px;padding:16px;color:var(--green);font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;text-align:center">
+              🍳 Ξεκίνα Meal Prep — Βήμα-Βήμα →
+            </button>
           </div>
         </div>
       </div>
@@ -371,6 +385,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
   </div>
 </div>
 
+<!-- PREP GUIDE -->
+<div class="prep-guide" id="prep-guide">
+  <div class="pg-head">
+    <button class="back-btn" onclick="closePrep()">✕</button>
+    <div class="pg-bar"><div class="pg-fill" id="pg-fill" style="width:0%"></div></div>
+    <div class="pg-num" id="pg-num">1 / 8</div>
+  </div>
+  <div class="pg-body" id="pg-body"></div>
+  <div class="pg-foot">
+    <button class="btn btn-green" id="pg-btn" onclick="nextPrepStep()">Έτοιμο ✓</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-secondary" id="pg-timer-btn" style="display:none" onclick="startPrepTimer()"></button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -395,6 +424,25 @@ const MEALS = [
   {id:'lunch', time:'13:00', end:'14:00', icon:'🍗', name:'Μεσημέρι', kcal:620, prot:48, foods:['160g κοτόπουλο ψημένο','150g ρύζι βραστό','Σαλάτα + 1 κ.σ. ελαιόλαδο']},
   {id:'snack', time:'17:00', end:'18:00', icon:'🥜', name:'Σνακ', kcal:230, prot:22, foods:['200g γιαούρτι 2%','1 κ.σ. peanut butter']},
   {id:'din', time:'21:00', end:'22:30', icon:'🐟', name:'Βράδυ', kcal:320, prot:35, foods:['150g τόνος (κονσέρβα)','Σαλάτα','1 φέτα ψωμί ολικής']}
+];
+
+const MEAL_SRC={
+  pre:  {icon:'⚡',label:'Αμέσως — shake + μπανάνα'},
+  post: {icon:'🍳',label:'Microwave 3\' — αυγά'},
+  lunch:{icon:'📦',label:'Tupperware (batch cook Κυριακή)'},
+  snack:{icon:'⚡',label:'Αμέσως — άνοιξε & φάε'},
+  din:  {icon:'🥫',label:'Κονσέρβα — γρήγορο 2\''}
+};
+
+const PREP_STEPS=[
+  {emoji:'🛒',title:'Μάζεψε τα υλικά',desc:'Βγάλε από το ψυγείο:\n→ 1 kg κοτόπουλο φιλέτο\n→ 4 αυγά\n→ 400g ρύζι\n→ Ελαιόλαδο, αλάτι, πιπέρι',timer:0},
+  {emoji:'🔥',title:'Άναψε τον φούρνο',desc:'Στρίψε στους 200°C\nΆφησε να ζεσταθεί ~5\'\nΕτοίμαζε κοτόπουλο στο μεταξύ',timer:0},
+  {emoji:'🔪',title:'Ετοίμασε κοτόπουλο',desc:'Κόψε σε μέτρια κομμάτια\nΡίξε ελαιόλαδο, αλάτι, πιπέρι\nΑνακάτεψε καλά — βάλε στο ταψί',timer:0},
+  {emoji:'🍗',title:'Κοτόπουλο στον φούρνο',desc:'Βάλε το ταψί στον φούρνο\nΞεκίνα timer 25\' ↓\nΚάνε ρύζι & αυγά στο μεταξύ',timer:25*60},
+  {emoji:'🍚',title:'Βάλε ρύζι',desc:'Ζύγισε 400g ρύζι\nΠλύνε με κρύο νερό\nΚατσαρόλα: 800ml νερό + ρύζι\nΒράσε 18\' σε χαμηλή φωτιά',timer:18*60},
+  {emoji:'🥚',title:'Αυγά σκληρά',desc:'4 αυγά σε κρύο νερό\nΑνάψε φωτιά — περίμενε να βράσει\nΜόλις βράσει: ξεκίνα timer 10\'',timer:10*60},
+  {emoji:'📦',title:'Φτιάξε 4 Tupperware',desc:'Σε κάθε tupperware:\n→ 160g κοτόπουλο\n→ 150g ρύζι\n→ 1 αυγό\n\nΑυτό = μεσημέρι για 4 μέρες! 🎯',timer:0},
+  {emoji:'❄️',title:'Ψυγείο — DONE!',desc:'Βάλε τα 4 tupperware στο ψυγείο\nΚρατάνε 4-5 μέρες ✓\n\nΜόλις εξοικονόμησες 3 ώρες\nμαγειρέματος για ολόκληρη την εβδομάδα!',timer:0,final:true}
 ];
 
 const WO = {
@@ -688,6 +736,7 @@ function renderFood(){
         <div class="meal-info">
           <div class="meal-name">${m.name}${cur?' <span style="background:var(--accent);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px">ΤΩΡΑ</span>':''}</div>
           <div class="meal-time-t">${m.time}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">${MEAL_SRC[m.id].icon} ${MEAL_SRC[m.id].label}</div>
         </div>
         <div class="meal-kcal-box"><div class="meal-kcal-n">${m.kcal}</div><div class="meal-prot">${m.prot}g πρωτ.</div></div>
       </div>
@@ -895,6 +944,93 @@ function ateMeal(mealId){
     toast('Τελείωσες για σήμερα! Ύπνος πριν 23:30 🌙');
   }
   renderToday();
+}
+
+// ─── PREP GUIDE ──────────────────────────────────────
+let prepStep=0, prepTimerInt=null, prepTimerSec=0, prepTimerRunning=false;
+
+function openPrep(){
+  prepStep=0;
+  clearInterval(prepTimerInt);
+  prepTimerRunning=false;
+  document.getElementById('prep-guide').classList.add('show');
+  renderPrepStep();
+}
+function closePrep(){
+  clearInterval(prepTimerInt);
+  prepTimerRunning=false;
+  document.getElementById('prep-guide').classList.remove('show');
+}
+function renderPrepStep(){
+  const s=PREP_STEPS[prepStep];
+  const total=PREP_STEPS.length;
+  const pct=Math.round((prepStep/total)*100);
+  document.getElementById('pg-fill').style.width=pct+'%';
+  document.getElementById('pg-num').textContent=(prepStep+1)+' / '+total;
+
+  document.getElementById('pg-body').innerHTML=`
+    <div class="pg-emoji">${s.emoji}</div>
+    <div class="pg-title">${s.title}</div>
+    <div class="pg-desc">${s.desc}</div>
+    ${s.timer?`<div class="pg-timer-wrap"><div class="pg-timer-num" id="pg-timer-num">${fmtTimer(s.timer)}</div><div class="pg-timer-lbl" id="pg-timer-lbl">πάτα για να ξεκινήσεις</div></div>`:''}
+  `;
+
+  const mainBtn=document.getElementById('pg-btn');
+  const timerBtn=document.getElementById('pg-timer-btn');
+  if(s.final){
+    mainBtn.textContent='🎉 Τέλεια — Κλείσιμο';
+    mainBtn.style.background='var(--accent)';
+  } else {
+    mainBtn.textContent='Έτοιμο ✓';
+    mainBtn.style.background='';
+  }
+
+  if(s.timer){
+    prepTimerSec=s.timer;
+    prepTimerRunning=false;
+    timerBtn.style.display='block';
+    timerBtn.textContent='▶ Ξεκίνα Timer ('+fmtTimer(s.timer)+')';
+  } else {
+    timerBtn.style.display='none';
+  }
+}
+function fmtTimer(sec){
+  const m=Math.floor(sec/60), s=sec%60;
+  return m+':'+(s<10?'0':'')+s;
+}
+function startPrepTimer(){
+  if(prepTimerRunning) return;
+  prepTimerRunning=true;
+  const timerBtn=document.getElementById('pg-timer-btn');
+  timerBtn.style.display='none';
+  clearInterval(prepTimerInt);
+  prepTimerInt=setInterval(()=>{
+    prepTimerSec--;
+    const el=document.getElementById('pg-timer-num');
+    const lbl=document.getElementById('pg-timer-lbl');
+    if(el) el.textContent=fmtTimer(Math.max(0,prepTimerSec));
+    if(prepTimerSec<=0){
+      clearInterval(prepTimerInt);
+      prepTimerRunning=false;
+      if(lbl) lbl.textContent='✓ Έτοιμο!';
+      if(el) el.style.color='var(--accent)';
+      playBeep();
+    }
+  },1000);
+}
+function nextPrepStep(){
+  clearInterval(prepTimerInt);
+  prepTimerRunning=false;
+  if(PREP_STEPS[prepStep].final){closePrep();toast('🎉 Εβδομαδιαίο meal prep ολοκληρώθηκε!');return}
+  prepStep++;
+  renderPrepStep();
+  // micro-animation
+  const body=document.getElementById('pg-body');
+  body.style.opacity='0';body.style.transform='translateX(40px)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    body.style.transition='opacity .3s ease,transform .3s ease';
+    body.style.opacity='1';body.style.transform='translateX(0)';
+  }));
 }
 
 // ─── SETTINGS ────────────────────────────────────────
