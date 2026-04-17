@@ -289,6 +289,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
         <div style="font-size:16px;font-weight:700;margin-bottom:10px">Ιστορικό</div>
         <div id="log-hist"></div>
       </div>
+      <div style="padding:0 16px 12px">
+        <div class="section-title" style="margin-bottom:10px">ΓΥΜΝΑΣΤΗΡΙΟ 💪</div>
+        <div id="wo-cal-area"></div>
+      </div>
       <div style="padding:0 16px 16px">
         <div class="section-title" style="margin-bottom:10px">ΣΤΟΧΟΙ ΙΟΥΛΙΟΣ</div>
         <div class="card" style="padding:16px">
@@ -681,6 +685,7 @@ function nextEx(){
 }
 
 function showWorkoutDone(){
+  logWorkout(ps.wo);
   // Find next meal to eat (post-workout or whatever is next)
   const nm=nowMins();
   let nextM=MEALS.find(m=>toMins(m.time)>nm)||MEALS.find(m=>m.id==='post');
@@ -747,6 +752,7 @@ function renderFood(){
 
 // ─── TRACK ───────────────────────────────────────────
 function renderTrack(){
+  renderWoCal();
   const log=getLog();
   const hist=document.getElementById('log-hist'), avg=document.getElementById('avg-area');
   if(!log.length){hist.innerHTML='<div class="empty-log">Δεν υπάρχουν μετρήσεις ακόμα</div>';avg.innerHTML='';return}
@@ -944,6 +950,97 @@ function ateMeal(mealId){
     toast('Τελείωσες για σήμερα! Ύπνος πριν 23:30 🌙');
   }
   renderToday();
+}
+
+// ─── WORKOUT CALENDAR ────────────────────────────────
+function getWoLog(){try{return JSON.parse(localStorage.getItem('fp_wo_log'))||[];}catch{return[]}}
+
+function logWorkout(type){
+  const log=getWoLog();
+  const today=new Date().toISOString().split('T')[0];
+  if(!log.find(e=>e.date===today)){
+    log.push({date:today,type});
+    localStorage.setItem('fp_wo_log',JSON.stringify(log));
+  }
+}
+
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+const WO_COLORS={push:'#FF6B35',pull:'#0a84ff',legs:'#30d158'};
+const WO_LABELS={push:'PUSH',pull:'PULL',legs:'ΠΟΔΙΑ'};
+
+function renderWoCal(){
+  const log=getWoLog();
+  const logMap={};
+  log.forEach(e=>{logMap[e.date]=e.type});
+
+  const now=new Date();
+  const today=now.toISOString().split('T')[0];
+
+  // week starts Monday
+  const dow=now.getDay();
+  const wkStart=new Date(now);
+  wkStart.setDate(now.getDate()-(dow===0?6:dow-1));
+  const wkStr=wkStart.toISOString().split('T')[0];
+  const moStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+  const yrStr=`${now.getFullYear()}-01-01`;
+
+  const wk=log.filter(e=>e.date>=wkStr).length;
+  const mo=log.filter(e=>e.date>=moStr).length;
+  const yr=log.filter(e=>e.date>=yrStr).length;
+  const tot=log.length;
+
+  const MONTHS=['Ιανουάριος','Φεβρουάριος','Μάρτιος','Απρίλιος','Μάιος','Ιούνιος','Ιούλιος','Αύγουστος','Σεπτέμβριος','Οκτώβριος','Νοέμβριος','Δεκέμβριος'];
+  const DAYS=['Δ','Τ','Τ','Π','Π','Σ','Κ'];
+
+  const firstDow=new Date(calYear,calMonth,1).getDay();
+  // shift so week starts Monday (0=Mon)
+  const offset=(firstDow===0?6:firstDow-1);
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+
+  let cells='';
+  for(let i=0;i<offset;i++) cells+=`<div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const wo=logMap[ds];
+    const isToday=ds===today;
+    const col=wo?WO_COLORS[wo]:null;
+    cells+=`<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 0">
+      <div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:${isToday?900:400};color:${isToday?'#fff':'var(--text)'};background:${isToday?'var(--accent)':'transparent'}">${d}</div>
+      <div style="width:7px;height:7px;border-radius:50%;background:${col||'transparent'}"></div>
+    </div>`;
+  }
+
+  document.getElementById('wo-cal-area').innerHTML=`
+    <div style="background:var(--card);border-radius:16px;padding:16px;margin-bottom:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+        ${[['Εβδομάδα',wk],['Μήνας',mo],['Φέτος',yr],['Σύνολο',tot]].map(([l,v])=>`
+          <div style="text-align:center;background:var(--card2);border-radius:10px;padding:10px 4px">
+            <div style="font-size:24px;font-weight:900;color:var(--accent)">${v}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">${l}</div>
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <button onclick="calNav(-1)" style="background:var(--card2);border:none;border-radius:8px;width:34px;height:34px;color:var(--text);font-size:18px;cursor:pointer">‹</button>
+        <div style="font-size:15px;font-weight:700">${MONTHS[calMonth]} ${calYear}</div>
+        <button onclick="calNav(1)" style="background:var(--card2);border:none;border-radius:8px;width:34px;height:34px;color:var(--text);font-size:18px;cursor:pointer">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px">
+        ${DAYS.map(d=>`<div style="text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:2px 0">${d}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+        ${cells}
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;justify-content:center">
+        ${Object.entries(WO_LABELS).map(([k,l])=>`<div style="display:flex;align-items:center;gap:5px"><div style="width:9px;height:9px;border-radius:50%;background:${WO_COLORS[k]}"></div><span style="font-size:11px;color:var(--text3)">${l}</span></div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function calNav(dir){
+  calMonth+=dir;
+  if(calMonth<0){calMonth=11;calYear--}
+  if(calMonth>11){calMonth=0;calYear++}
+  renderWoCal();
 }
 
 // ─── PREP GUIDE ──────────────────────────────────────
