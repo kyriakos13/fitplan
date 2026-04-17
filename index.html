@@ -366,7 +366,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
       <button class="skip-btn" onclick="skipRest()">Παράλειψη →</button>
     </div>
     <div class="cue-card"><div class="cue-lbl">Form cue</div><div class="cue-txt" id="p-cue"></div></div>
-    <a class="yt-btn" id="yt-link" href="#" target="_blank" rel="noopener"><span class="yt-icon">▶ YT</span><span>Demo στο YouTube</span></a>
+    <div id="ex-demo" style="background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:10px;min-height:80px;display:flex;align-items:center;justify-content:center">
+      <div id="ex-demo-inner" style="color:var(--text3);font-size:13px;padding:20px">Φορτώνει demo...</div>
+    </div>
+    <a class="yt-btn" id="yt-link" href="#" rel="noopener"><span class="yt-icon">▶ YT</span><span>YouTube tutorial →</span></a>
     <!-- WORKOUT DONE SCREEN -->
     <div id="done-screen" style="display:none">
       <div style="text-align:center;padding:24px 0 16px">
@@ -403,6 +406,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
     <div style="height:8px"></div>
     <button class="btn btn-secondary" id="pg-timer-btn" style="display:none" onclick="startPrepTimer()"></button>
   </div>
+</div>
+
+<!-- VIDEO OVERLAY -->
+<div id="vid-overlay" style="display:none;position:fixed;inset:0;z-index:170;background:rgba(0,0,0,.97);flex-direction:column;padding-top:var(--st)">
+  <div style="display:flex;align-items:center;padding:12px 16px;gap:12px">
+    <button onclick="closeVid()" style="background:var(--card2);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0">✕</button>
+    <div id="vid-ex-name" style="font-size:16px;font-weight:700"></div>
+  </div>
+  <div style="padding:0 16px;flex:1">
+    <iframe id="vid-frame" width="100%" height="240" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen style="border-radius:12px;display:block;background:#000"></iframe>
+  </div>
+  <div style="padding:16px;text-align:center;color:var(--text3);font-size:13px">Κλείσε για να επιστρέψεις στην άσκηση</div>
 </div>
 
 <!-- TOAST -->
@@ -613,7 +628,14 @@ function openPlayer(ei){
   document.getElementById('p-name').textContent=e.el;
   document.getElementById('p-sub').textContent=e.en;
   document.getElementById('p-cue').textContent=e.cue;
-  document.getElementById('yt-link').href=`https://www.youtube.com/results?search_query=${encodeURIComponent(e.yt)}`;
+  document.getElementById('yt-link').href='#';
+  document.getElementById('yt-link').onclick=(ev)=>{ev.preventDefault();openVid(e.el,e.yt)};
+  document.getElementById('yt-link').querySelector('span:last-child').textContent='YouTube tutorial →';
+  // Reset demo section then fetch
+  const di=document.getElementById('ex-demo-inner');
+  di.style.cssText='color:var(--text3);font-size:13px;padding:20px';
+  di.textContent='Φορτώνει demo...';
+  fetchExDemo(e.en);
   updatePlayer();
   document.getElementById('player').classList.add('show');
 }
@@ -679,7 +701,13 @@ function nextEx(){
     document.getElementById('p-name').textContent=e.el;
     document.getElementById('p-sub').textContent=e.en;
     document.getElementById('p-cue').textContent=e.cue;
-    document.getElementById('yt-link').href=`https://www.youtube.com/results?search_query=${encodeURIComponent(e.yt)}`;
+    document.getElementById('yt-link').href='#';
+    document.getElementById('yt-link').onclick=(ev)=>{ev.preventDefault();openVid(e.el,e.yt)};
+    document.getElementById('yt-link').querySelector('span:last-child').textContent='YouTube tutorial →';
+    const di=document.getElementById('ex-demo-inner');
+    di.style.cssText='color:var(--text3);font-size:13px;padding:20px';
+    di.textContent='Φορτώνει demo...';
+    fetchExDemo(e.en);
     document.getElementById('pbody').scrollTop=0;
     updatePlayer();
   } else {showWorkoutDone()}
@@ -1178,6 +1206,58 @@ function saveSettings(){
   localStorage.setItem('fp_settings',JSON.stringify({gymTime,days}));
   toast('✓ Ρυθμίσεις αποθηκεύτηκαν');
   renderToday();
+}
+
+// ─── EXERCISE DEMO ────────────────────────────────────
+const demoCache={};
+// Hardcoded wger.de base IDs for the exercises in this app (search endpoint requires auth)
+const WGER_IDS={
+  'Cable Lateral Raise':1378,
+  'Lat Pulldown Wide Grip':158,
+  'Incline Chest Press Machine':1655,
+  'Shoulder Press Machine':543,
+  'Triceps Pushdown Cable':1185,
+  'Nautilus Pullover Machine':1634,
+  'Chest-Supported Row':1283,
+  'Reverse Pec Deck':828,
+  'Biceps Curl Machine':1192,
+  'Hip Abduction Machine':1748,
+  'Leg Press High Wide':375,
+  'Seated Leg Curl':366,
+  'Leg Extension':369,
+  'Standing Calf Raise':622,
+  'Pec Deck / Πεταλούδα':135
+};
+
+async function fetchExDemo(name){
+  const el=document.getElementById('ex-demo-inner');
+  if(!el)return;
+  if(demoCache[name]){el.innerHTML=demoCache[name];el.style.cssText='display:flex;gap:0;padding:0;width:100%';return}
+  el.textContent='⏳ Φορτώνει demo...';
+  try{
+    const baseId=WGER_IDS[name];
+    if(!baseId)throw new Error('not found');
+    const ir=await fetch(`https://wger.de/api/v2/exerciseinfo/${baseId}/?format=json`);
+    const info=await ir.json();
+    const imgs=(info.images||[]).slice(0,2);
+    if(!imgs.length)throw new Error('no images');
+    const html=imgs.map(i=>`<img src="${i.image}" style="flex:1;width:50%;max-height:170px;object-fit:contain;background:#111" loading="lazy">`).join('');
+    demoCache[name]=html;
+    el.innerHTML=html;
+    el.style.cssText='display:flex;gap:0;padding:0;width:100%';
+  }catch(e){
+    el.innerHTML='<div style="padding:16px;font-size:13px;color:var(--text3);text-align:center">Demo δεν βρέθηκε</div>';
+  }
+}
+
+function openVid(name, ytQuery){
+  document.getElementById('vid-ex-name').textContent=name;
+  document.getElementById('vid-frame').src=`https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(ytQuery)}&rel=0&autoplay=1`;
+  document.getElementById('vid-overlay').style.display='flex';
+}
+function closeVid(){
+  document.getElementById('vid-frame').src='about:blank';
+  document.getElementById('vid-overlay').style.display='none';
 }
 
 // ─── INIT ────────────────────────────────────────────
