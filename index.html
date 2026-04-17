@@ -471,20 +471,33 @@ function selWorkout(key){
   selWo=key; done.clear();
   document.querySelectorAll('.day-btn').forEach(b=>b.classList.toggle('active',b.dataset.k===key));
   const w=WO[key];
+  const prog=getWoProg();
+  // restore done set from memory
+  Object.entries(prog).forEach(([i,v])=>{if(v.si>=w.ex[i]?.sets)done.add(Number(i))});
+  const totalDone=done.size, totalEx=w.ex.length;
   document.getElementById('workout-content').innerHTML=`
     <div style="padding:0 16px 8px;display:flex;justify-content:space-between;align-items:center">
       <div style="font-size:13px;color:var(--text3)">${w.ex.length} ασκήσεις · ~55 λεπτά</div>
-      <div style="font-size:12px;color:var(--text3)">⭐ = Προτεραιότητα</div>
+      ${totalDone>0?`<div style="font-size:12px;color:var(--green);font-weight:700">${totalDone}/${totalEx} ✓</div>`:`<div style="font-size:12px;color:var(--text3)">⭐ = Προτεραιότητα</div>`}
     </div>
-    <div class="ex-list">${w.ex.map((e,i)=>`
-      <div class="ex-item${e.star?' priority':''}" id="ei${i}" onclick="openPlayer(${i})">
-        <div class="ex-num" id="en${i}">${i+1}</div>
+    <div class="ex-list">${w.ex.map((e,i)=>{
+      const s=prog[i]||{si:0};
+      const isDone=s.si>=e.sets;
+      const inProg=s.si>0&&!isDone;
+      const detailTxt=isDone
+        ?`<span style="color:var(--green);font-weight:700">✓ Ολοκληρώθηκε</span>`
+        :inProg
+          ?`<span style="color:var(--accent);font-weight:700">${s.si}/${e.sets} σετ ✓</span> · ${e.reps} · ${e.rest}″`
+          :`${e.sets} σετ × ${e.reps} · ${e.rest}″ rest`;
+      return`<div class="ex-item${e.star?' priority':''}${isDone?' completed':''}" id="ei${i}" onclick="openPlayer(${i})">
+        <div class="ex-num${isDone?' done':''}" id="en${i}">${isDone?'✓':i+1}</div>
         <div class="ex-info">
           <div class="ex-name">${e.el}${e.star?' <span style="color:var(--accent);font-size:11px">⭐</span>':''}</div>
-          <div class="ex-detail">${e.sets} σετ × ${e.reps} · ${e.rest}″ rest</div>
+          <div class="ex-detail">${detailTxt}</div>
         </div>
         <div class="ex-chev">›</div>
-      </div>`).join('')}
+      </div>`;
+    }).join('')}
     </div>
     <div style="padding:16px">
       <div class="card" style="padding:16px">
@@ -499,9 +512,19 @@ function selWorkout(key){
     </div>`;
 }
 
+// ─── WORKOUT MEMORY ──────────────────────────────────
+function woProgKey(){return`fp_wo_${new Date().toDateString()}_${selWo}`}
+function getWoProg(){try{return JSON.parse(localStorage.getItem(woProgKey()))||{}}catch{return{}}}
+function saveWoProg(ei,si){
+  const p=getWoProg();
+  p[ei]={si};
+  localStorage.setItem(woProgKey(),JSON.stringify(p));
+}
+
 // ─── PLAYER ──────────────────────────────────────────
 function openPlayer(ei){
-  ps={wo:selWo,ei,si:0,resting:false,rint:null};
+  const saved=getWoProg()[ei]||{si:0};
+  ps={wo:selWo,ei,si:saved.si,resting:false,rint:null};
   const e=WO[selWo].ex[ei];
   document.getElementById('p-name').textContent=e.el;
   document.getElementById('p-sub').textContent=e.en;
@@ -543,6 +566,7 @@ function doSet(){
   if(ps.resting) return;
   const e=WO[ps.wo].ex[ps.ei];
   ps.si++;
+  saveWoProg(ps.ei,ps.si);
   if(ps.si<e.sets){startRest(e.rest)}
   else{updatePlayer();markDone(ps.ei);toast('Άσκηση ✓ 💪');vib([100,50,100])}
 }
