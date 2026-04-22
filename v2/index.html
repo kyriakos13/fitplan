@@ -363,10 +363,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
       <button class="skip-btn" onclick="skipRest()">Παράλειψη →</button>
     </div>
     <div class="cue-card"><div class="cue-lbl">Form cue</div><div class="cue-txt" id="p-cue"></div></div>
+    <div id="p-machine" style="background:linear-gradient(135deg,#ffffff08,#ffffff02);border:1px solid #ffffff10;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:none"></div>
     <div id="ex-demo" style="background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:10px;min-height:80px;display:flex;align-items:center;justify-content:center">
       <div id="ex-demo-inner" style="color:var(--text3);font-size:13px;padding:20px">Φορτώνει demo...</div>
     </div>
-    <a class="yt-btn" id="yt-link" href="#" rel="noopener"><span class="yt-icon">▶ YT</span><span>YouTube tutorial →</span></a>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <a class="yt-btn" id="yt-link" href="#" rel="noopener" style="flex:1"><span class="yt-icon">▶ YT</span><span>YouTube →</span></a>
+      <button id="mch-link" onclick="openMachineImg()" style="flex:1;padding:12px;border:1px solid #ffffff22;background:var(--card);color:var(--text);border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span>📸</span><span>Μηχάνημα →</span></button>
+    </div>
     <!-- WORKOUT DONE SCREEN -->
     <div id="done-screen" style="display:none">
       <div style="text-align:center;padding:24px 0 16px">
@@ -462,29 +466,67 @@ const PREP_STEPS=[
   {emoji:'❄️',title:'Ψυγείο — DONE!',desc:'Βάλε τα 4 tupperware στο ψυγείο\nΚρατάνε 4-5 μέρες ✓\n\nΜόλις εξοικονόμησες 3 ώρες\nμαγειρέματος για ολόκληρη την εβδομάδα!',timer:0,final:true}
 ];
 
+// ─── ULTRAFLEX PLAN (A/B rotation — μονές/ζυγές εβδομάδες) ─────────
 const WO = {
-  push:{key:'push', dayN:'Δευτέρα', day:1, name:'PUSH', color:'#FF6B35', sub:'Στήθος · Ώμοι · Τρικέφαλα', ex:[
-    {el:'Πλάγιος Ώμος (cable)', en:'Cable Lateral Raise', sets:4, reps:'15', rest:60, star:true, cue:'Μονόπλευρα. Αγκώνας ελαφρά λυγισμένος. Σήκωσε μέχρι ύψος ώμου — όχι πιο ψηλά.', yt:'cable lateral raise single arm form technique'},
-    {el:'Incline Πρέσα Στήθους', en:'Incline Chest Press Machine', sets:3, reps:'8–10', rest:90, star:false, cue:'Ψηλή κλίση. Ωμοπλάτες πίσω-κάτω. Σπρώξε ευθεία μπρος, ελεγχόμενη κάθοδος.', yt:'incline chest press machine proper form'},
-    {el:'Πρέσα Ώμου', en:'Shoulder Press Machine', sets:3, reps:'8–10', rest:90, star:false, cue:'Πλάτη κολλητά. Σπρώξε ψηλά χωρίς να κλειδώνεις τους αγκώνες πάνω.', yt:'shoulder press machine proper form'},
-    {el:'Pec Deck', en:'Pec Deck / Πεταλούδα', sets:3, reps:'12', rest:60, star:false, cue:'Αγκώνες στο ύψος ώμου. Έλα ως το μέτωπο, squeeze στη μέση 1 δευτ.', yt:'pec deck fly machine correct form'},
-    {el:'Triceps Pushdown', en:'Triceps Pushdown Cable', sets:2, reps:'12', rest:60, star:false, cue:'Αγκώνες σταθεροί πλάι. Κλείσε τελείως, κατέβα αργά — 2 δευτερόλεπτα.', yt:'triceps pushdown cable proper form'}
+  pushA:{key:'pushA', base:'push', variant:'A', dayN:'Δευτέρα', day:1, name:'PUSH A', color:'#FF6B35', sub:'Άνω στήθος + πλάγιοι ώμοι', ex:[
+    {el:'Machine Lateral Raise', en:'Machine Lateral Raise', machine:'Atlantis Plate-Loaded Lateral Raise', sets:4, reps:'12-15', rest:45, star:true, cue:'Κάθισμα στο ύψος ώμων. Pads στον ΜΕΣΟ βραχίονα (όχι καρπό). Σήκωσε έξω & ελαφρά πάνω — ΜΗΝ πας πάνω από 90°. Pause 1" στο τέλος. Eccentric 3".', yt:'atlantis plate loaded lateral raise machine form'},
+    {el:'Incline Chest Press 30°', en:'Incline Chest Press Machine', machine:'Prime Plate-Loaded Incline Press', sets:3, reps:'8-10', rest:120, star:true, cue:'Βάθος μέχρι stretch στο άνω στήθος. Σφίξε ωμοπλάτες. Αγκώνες 45° από κορμό, όχι 90°. Scapular retraction.', yt:'prime plate loaded incline press 30 degree form'},
+    {el:'Shoulder Press Machine', en:'Shoulder Press Machine', machine:'Newtech Shoulder Press (plate-loaded)', sets:3, reps:'8-10', rest:90, star:false, cue:'Στήριξη πλάτης στο pad. Μην κλειδώνεις αγκώνες πάνω. Eccentric 3".', yt:'plate loaded shoulder press machine form'},
+    {el:'Pec Deck Fly', en:'Pec Deck / Πεταλούδα', machine:'Olympia M-Torture Pec Deck', sets:3, reps:'12-15', rest:60, star:false, cue:'Σφίξε μπροστά 1" παύση. Αργό άνοιγμα για stretch. Μην σπρώχνεις με ώμο.', yt:'pec deck fly machine proper form'},
+    {el:'Triceps Rope Pushdown', en:'Triceps Pushdown Cable', machine:'Atlantis Functional Trainer', sets:3, reps:'12-15', rest:60, star:false, cue:'Σχοινί, ανοίγματα στο κάτω. Αγκώνες κολλημένοι στα πλευρά.', yt:'rope triceps pushdown cable form'}
   ]},
-  pull:{key:'pull', dayN:'Τετάρτη', day:3, name:'PULL', color:'#0a84ff', sub:'Πλάτη · Δικέφαλα · Πίσω Ώμος', ex:[
-    {el:'Lat Pulldown Φαρδιά', en:'Lat Pulldown Wide Grip', sets:4, reps:'8–10', rest:90, star:true, cue:'Φαρδύτερα από ώμους. Τράβα στο πηγούνι, στήθος ψηλά — μη γέρνεις πολύ πίσω.', yt:'lat pulldown wide grip form'},
-    {el:'Pullover Μηχάνημα', en:'Nautilus Pullover Machine', sets:3, reps:'12', rest:90, star:true, cue:'Αγκώνες ελαφρά λυγισμένοι. Νιώσε stretch στους lats πάνω. Τράβα με lats, όχι με χέρια.', yt:'nautilus pullover machine lat form'},
-    {el:'Κωπηλατική Στήθους', en:'Chest-Supported Row', sets:3, reps:'10', rest:90, star:false, cue:'Στήθος κολλητά στο μαξιλάρι. Αγκώνες πίσω και κάτω — squeeze πλάτης.', yt:'chest supported row machine form'},
-    {el:'Πίσω Ώμος (reverse deck)', en:'Reverse Pec Deck', sets:3, reps:'15', rest:60, star:false, cue:'Αγκώνες χαλαρά λυγισμένοι. Άνοιξε πλατιά, κράτα 1 δευτ., γύρνα ελεγχόμενα.', yt:'reverse pec deck rear delt form'},
-    {el:'Κάμψη Δικεφάλου', en:'Biceps Curl Machine', sets:2, reps:'10', rest:60, star:false, cue:'Αγκώνες σταθεροί. Κατέβα αργά (2 δευτ.) — το negative είναι το μισό του kέρδους.', yt:'bicep curl machine proper form'}
+  pushB:{key:'pushB', base:'push', variant:'B', dayN:'Δευτέρα', day:1, name:'PUSH B', color:'#FF6B35', sub:'Βαρύ press + ώμοι', ex:[
+    {el:'Smith Incline Press 30°', en:'Smith Incline Bench Press', machine:'Ultraflex Smith + adjustable bench', sets:4, reps:'6-8', rest:150, star:true, cue:'Βαρύ compound. Bench 30°, μπάρα αγγίζει ψηλά στο στήθος. Πόδια σταθερά, μην σηκώνεις γλουτό.', yt:'smith machine incline bench press form'},
+    {el:'Cable Lateral Raise (μονόπλευρα)', en:'Cable Lateral Raise', machine:'Atlantis Functional Trainer', sets:4, reps:'12-15', rest:45, star:true, cue:'Pulley στο ύψος ισχύου. Στάσου πλάι, χέρι διασταυρώνει μπροστά. Pinky ψηλά.', yt:'cable lateral raise single arm form'},
+    {el:'Iso-Lateral Incline Press', en:'Iso-Lateral Incline Press Machine', machine:'Olympia M-Torture Incline (unilateral)', sets:3, reps:'8-10/side', rest:90, star:false, cue:'Ένα χέρι τη φορά. Στηρίξου με το άλλο. Διορθώνει αριστερή/δεξιά ασυμμετρία.', yt:'iso lateral incline press machine form'},
+    {el:'Cable Upper Chest Fly (low-to-high)', en:'Low to High Cable Fly', machine:'Atlantis Functional Trainer', sets:3, reps:'12-15', rest:60, star:false, cue:'Pulleys κάτω. Σπρώξε χέρια ψηλά & μέσα — αγκαλιά ψηλά. Σφίξε 1" στο κέντρο.', yt:'low to high cable chest fly form'},
+    {el:'Overhead Triceps Ext (rope)', en:'Overhead Triceps Extension Rope', machine:'Atlantis Functional Trainer', sets:3, reps:'12', rest:60, star:false, cue:'Pulley ψηλά, γύρισε πλάτη, σχοινί πίσω από κεφάλι. Stretch long head στο κάτω.', yt:'overhead cable rope triceps extension form'}
   ]},
-  legs:{key:'legs', dayN:'Παρασκευή', day:5, name:'ΠΟΔΙΑ', color:'#30d158', sub:'Γλουτοί · Μηρός · Γάμπα', ex:[
-    {el:'Αποπαγωγή (Έξω μηρός)', en:'Hip Abduction Machine', sets:4, reps:'15', rest:60, star:true, cue:'Άνοιξε αργά ως max range, squeeze γλουτό. Κλείσε ελεγχόμενα — μην αφήνεσαι να πέσεις.', yt:'hip abduction machine glutes proper form'},
-    {el:'Leg Press (Ψηλά-Φαρδιά)', en:'Leg Press High Wide', sets:3, reps:'10–12', rest:90, star:false, cue:'Πόδια ψηλά και φαρδιά = περισσότερος γλουτός. Κατέβα ελεγχόμενα, ανέβα χωρίς κλείδωμα.', yt:'leg press high foot placement glutes activation'},
-    {el:'Κάμψη Μηρού Καθιστή', en:'Seated Leg Curl', sets:3, reps:'12', rest:60, star:false, cue:'Full range: ανέβα τελείως, κατέβα αργά. Κράτα 1 δευτ. στη συστολή.', yt:'seated leg curl machine form'},
-    {el:'Έκταση Μηρού', en:'Leg Extension', sets:2, reps:'15', rest:60, star:false, cue:'Ανέβα ψηλά, squeeze 1 δευτ., κατέβα αργά. Χωρίς ανταρτσάρισμα από τη μέση.', yt:'leg extension machine proper form'},
-    {el:'Γάμπα Όρθια', en:'Standing Calf Raise', sets:3, reps:'15', rest:60, star:false, cue:'Full range: κατέβα ως stretch, ανέβα ψηλά, κράτα 1 δευτ. πάνω. Αργό τέμπο.', yt:'standing calf raise machine form full range'}
+  pullA:{key:'pullA', base:'pull', variant:'A', dayN:'Τετάρτη', day:3, name:'PULL A', color:'#0a84ff', sub:'Lats focus · V-taper', ex:[
+    {el:'Lat Pulldown (στενή ουδέτερη)', en:'Lat Pulldown Neutral Grip', machine:'Atlantis Lat Pulldown (selectorized)', sets:4, reps:'8-10', rest:120, star:true, cue:'ΟΧΙ φαρδιά! Στενή neutral ή underhand. Lean πίσω 15°. Τράβα αγκώνες ΚΑΤΩ & ΠΙΣΩ — σαν να αγγίζεις πίσω τσέπες.', yt:'lat pulldown close neutral grip form'},
+    {el:'Plate-Loaded Pullover', en:'Plate Loaded Pullover Machine', machine:'Gymleco Standing Pullover', sets:3, reps:'10-12', rest:90, star:true, cue:'Straight-arm — χέρια σχεδόν ίσια. Φέρε βάρος από ψηλά κάτω σε τόξο. ΜΗΝ λυγίζεις αγκώνα.', yt:'plate loaded pullover machine lat form'},
+    {el:'Chest-Supported Row (elbows tucked)', en:'Chest Supported Row Machine', machine:'Prime Extreme Row (plate-loaded)', sets:3, reps:'10-12', rest:90, star:false, cue:'Στήθος στο pad. Αγκώνες κολλημένοι στα πλευρά (lat focus). Τράβα χαμηλά στην κοιλιά.', yt:'prime chest supported row form'},
+    {el:'Reverse Pec Deck', en:'Reverse Pec Deck', machine:'Prime Pec/Rear Delt Combo', sets:3, reps:'15', rest:45, star:false, cue:'Κάθισε ανάποδα στο pec deck. Pinky ψηλά (external rotation). Σφίξε ωμοπλάτες στο τέλος.', yt:'reverse pec deck rear delt form'},
+    {el:'Machine Biceps Curl', en:'Biceps Curl Machine', machine:'Atlantis Biceps Curl (selectorized)', sets:3, reps:'10-12', rest:60, star:false, cue:'Full stretch στο κάτω. Controlled eccentric 2".', yt:'biceps curl machine proper form'}
+  ]},
+  pullB:{key:'pullB', base:'pull', variant:'B', dayN:'Τετάρτη', day:3, name:'PULL B', color:'#0a84ff', sub:'Πάχος πλάτης + rear delt', ex:[
+    {el:'Chest-Supported Row (flared)', en:'Chest Supported Row Flared', machine:'Prime Extreme Row', sets:4, reps:'8-10', rest:120, star:true, cue:'Σήμερα για ΠΑΧΟΣ. Αγκώνες ΕΞΩ σε 45°, τράβα ψηλά στο στήθος. Σφίξε ωμοπλάτες 1".', yt:'chest supported row flared elbow form'},
+    {el:'Iso-Lateral Pulldown (underhand)', en:'Iso Lateral Pulldown Machine', machine:'Plate-Loaded Iso-Lateral Pulldown', sets:3, reps:'10-12', rest:90, star:true, cue:'Independent arms, underhand grip, shoulder-width. Focus: lower lats. Lean 15° πίσω.', yt:'iso lateral pulldown machine underhand form'},
+    {el:'Cable Pullover (rope)', en:'Cable Rope Pullover', machine:'Atlantis Functional Trainer (pulley ψηλά)', sets:3, reps:'12-15', rest:60, star:false, cue:'Γονάτισε μπροστά. Pulley ψηλά, σχοινί. Τράβα με ίσια χέρια μέχρι τους μηρούς.', yt:'cable rope pullover straight arm form'},
+    {el:'Reverse Pec Deck (heavy)', en:'Reverse Pec Deck Heavy', machine:'Prime Pec/Rear Delt', sets:4, reps:'10-12', rest:60, star:false, cue:'Σήμερα πιο βαρύ, χαμηλότερες reps. Peak contraction focus.', yt:'reverse pec deck heavy rear delt form'},
+    {el:'Preacher Curl (plate-loaded)', en:'Preacher Curl Machine', machine:'Prime Torque Preacher Curl', sets:3, reps:'10', rest:60, star:false, cue:'Αγκώνες σταθεροί στο pad. Stretch κάτω, όχι πλήρες extension (κρατάμε tension).', yt:'plate loaded preacher curl form'}
+  ]},
+  legsA:{key:'legsA', base:'legs', variant:'A', dayN:'Παρασκευή', day:5, name:'LEGS A', color:'#30d158', sub:'Γλουτοί (medius + maximus)', ex:[
+    {el:'Hip Abduction (lean forward)', en:'Hip Abduction Machine', machine:'Hoist Hip Abduction/Adduction', sets:4, reps:'15-20', rest:60, star:true, cue:'Lean forward 15° — βγάλε στήθος από το pad. Μετατοπίζει focus από TFL στον glute medius. Pause 1" στο άνοιγμα.', yt:'hip abduction lean forward glute medius form'},
+    {el:'Leg Press (πόδια ψηλά + πλατιά)', en:'Leg Press High Wide', machine:'Hoist Roc-It Leg Press', sets:4, reps:'10-12', rest:120, star:true, cue:'Πόδια ΨΗΛΑ στο pad και ΠΛΑΤΙΑ. Γόνατα στη γραμμή των δακτύλων. Βάθος μέχρι τα γοφιά ΜΗΝ κάνουν tuck.', yt:'leg press high wide foot placement glutes'},
+    {el:'Glute Kickback (standing)', en:'Glute Kickback Machine', machine:'Atlantis Glute Kickback', sets:3, reps:'12-15/leg', rest:60, star:false, cue:'Στάσου στην πλατφόρμα. Σφίξε γλουτό ΠΡΩΤΑ, μετά πίεσε πόδι πίσω. Μην λυγίζεις μέση.', yt:'standing glute kickback machine form'},
+    {el:'Seated Leg Curl', en:'Seated Leg Curl', machine:'Atlantis Seated Leg Curl', sets:3, reps:'12-15', rest:60, star:false, cue:'Controlled eccentric 3". Σφίξε hamstring πάνω 1".', yt:'seated leg curl machine form'},
+    {el:'Seated Calf Raise', en:'Seated Calf Raise', machine:'Ultraflex Seated Calf', sets:4, reps:'12-15', rest:45, star:false, cue:'Full stretch κάτω με pause 2". Σφίξε δυνατά στο πάνω.', yt:'seated calf raise machine form full range'}
+  ]},
+  legsB:{key:'legsB', base:'legs', variant:'B', dayN:'Παρασκευή', day:5, name:'LEGS B', color:'#30d158', sub:'Quads + hamstrings βαρύ', ex:[
+    {el:'Belt Squat (ή Leg Press χαμηλά)', en:'Belt Squat', machine:'Belt Squat machine (ή Hoist Leg Press)', sets:4, reps:'8-10', rest:150, star:true, cue:'Belt squat ΙΔΑΝΙΚΟ: μηδενικό axial fatigue, deep squat, quads focus. Αν πιασμένο → leg press πόδια ΧΑΜΗΛΑ & ΣΤΕΝΑ.', yt:'belt squat machine form quads'},
+    {el:'Seated Leg Curl (heavy)', en:'Seated Leg Curl Heavy', machine:'Atlantis Seated Leg Curl', sets:4, reps:'8-10', rest:90, star:true, cue:'Σήμερα βαρύ για τα hamstrings. Eccentric 3".', yt:'seated leg curl heavy form'},
+    {el:'Leg Extension + partials', en:'Leg Extension', machine:'Prime Leg Extension', sets:3, reps:'15+10 partials', rest:60, star:false, cue:'Μετά 15 reps, κάνε 10 partial reps στο κάτω μισό. Σοβαρό burn στους quads.', yt:'leg extension full range plus partials form'},
+    {el:'Glute Kickback', en:'Glute Kickback Machine', machine:'Atlantis Glute Kickback', sets:3, reps:'12/leg', rest:60, star:false, cue:'Όπως σε Legs A — σφίξε γλουτό πρώτα, μετά πίεσε.', yt:'glute kickback machine form'},
+    {el:'Standing Calf (leg press)', en:'Calf Raise Leg Press', machine:'Hoist Leg Press (μπάλες ποδιών)', sets:3, reps:'12-15', rest:45, star:false, cue:'Πάτα μόνο μπάλες στο κάτω μέρος του leg press pad. Full stretch κάτω.', yt:'leg press calf raise form'}
   ]}
 };
+
+// Week parity — A = μονές (1,3,5…), B = ζυγές (2,4,6…)
+function weekParity(){
+  // ISO week calc
+  const d=new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+3-(d.getDay()+6)%7);
+  const w1=new Date(d.getFullYear(),0,4);
+  const wk=1+Math.round(((d-w1)/86400000-3+(w1.getDay()+6)%7)/7);
+  return wk%2===1?'A':'B';
+}
+// Resolve settings day ('push'/'pull'/'legs') → WO key ('pushA'/'pushB'…)
+function resolveWoKey(base){
+  if(!base||base==='off')return null;
+  return base+weekParity();
+}
 
 // ─── STATE ──────────────────────────────────────────
 let curPage = 'today';
@@ -639,15 +681,16 @@ function renderToday(){
   renderQuickLog();
 
   const s=getSettings();
-  const woKey=s.days[dow]==='off'?null:s.days[dow];
+  const woKey=resolveWoKey(s.days[dow]);
   const wa=document.getElementById('today-workout-area');
   const kcalEl=document.getElementById('kcal-t');if(kcalEl)kcalEl.textContent=woKey?'~1650':'~1450';
 
   if(woKey){
     const w=WO[woKey];
+    const parity=weekParity();
     wa.innerHTML=`<div style="background:linear-gradient(135deg,${w.color}22,${w.color}08);border:1.5px solid ${w.color}44;border-radius:20px;padding:20px;margin-bottom:8px;cursor:pointer" onclick="nav('gym');selWorkout('${woKey}')">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="font-size:32px">💪</div><div><div style="font-size:24px;font-weight:900;color:${w.color}">${w.name}</div><div style="font-size:12px;color:var(--text3)">${w.sub}</div></div></div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:14px">${w.ex.slice(0,3).map(e=>`• ${e.el}`).join('<br>')}${w.ex.length>3?`<br><span style="color:var(--text3)">+ ${w.ex.length-3} ακόμα</span>`:''}</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="font-size:32px">💪</div><div style="flex:1"><div style="font-size:24px;font-weight:900;color:${w.color}">${w.name}</div><div style="font-size:12px;color:var(--text3)">${w.sub}</div></div><div style="font-size:10px;background:${w.color}33;color:${w.color};padding:4px 8px;border-radius:8px;font-weight:800">Εβδ ${parity}</div></div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:14px">${w.ex.slice(0,3).map(e=>`${e.star?'⭐ ':'• '}${e.el}`).join('<br>')}${w.ex.length>3?`<br><span style="color:var(--text3)">+ ${w.ex.length-3} ακόμα</span>`:''}</div>
       <div style="background:${w.color};border-radius:10px;padding:12px;text-align:center;font-size:15px;font-weight:800;color:#fff">Ξεκίνα την προπόνηση →</div>
     </div>`;
   } else {
@@ -661,7 +704,7 @@ function initGym(){
   sel.innerHTML=Object.values(WO).map(w=>`<button class="day-btn" data-k="${w.key}" onclick="selWorkout('${w.key}')" style="color:${w.color}"><span class="db-name">${w.name}</span><span class="db-day">${w.dayN}</span><span class="db-sub">${w.sub.split(' · ').slice(0,2).join('/')}</span></button>`).join('');
   const today=new Date().getDay();
   const s=getSettings();
-  const auto=s.days[today]&&s.days[today]!=='off'?s.days[today]:'push';
+  const auto=resolveWoKey(s.days[today])||'push'+weekParity();
   selWorkout(auto);
 }
 
@@ -692,6 +735,7 @@ function selWorkout(key){
         <div class="ex-info">
           <div class="ex-name">${e.el}${e.star?' <span style="color:var(--accent);font-size:11px">⭐</span>':''}</div>
           <div class="ex-detail">${detailTxt}</div>
+          ${e.machine?`<div style="font-size:10px;color:var(--text3);margin-top:3px;opacity:.8">🏋 ${e.machine}</div>`:''}
         </div>
         <div class="ex-chev">›</div>
       </div>`;
@@ -729,7 +773,13 @@ function openPlayer(ei){
   document.getElementById('p-cue').textContent=e.cue;
   document.getElementById('yt-link').href='#';
   document.getElementById('yt-link').onclick=(ev)=>{ev.preventDefault();openVid(e.el,e.yt)};
-  document.getElementById('yt-link').querySelector('span:last-child').textContent='YouTube tutorial →';
+  document.getElementById('yt-link').querySelector('span:last-child').textContent='YouTube →';
+  // Machine badge (Ultraflex brand + model)
+  const mb=document.getElementById('p-machine');
+  if(e.machine){
+    mb.style.display='block';
+    mb.innerHTML=`<div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.5px;margin-bottom:2px">🏋 ΜΗΧΑΝΗΜΑ ULTRAFLEX</div><div style="font-size:14px;font-weight:700;color:var(--text)">${e.machine}</div>`;
+  } else {mb.style.display='none'}
   // Reset demo section then fetch
   const di=document.getElementById('ex-demo-inner');
   di.style.cssText='color:var(--text3);font-size:13px;padding:20px';
@@ -802,7 +852,9 @@ function nextEx(){
     document.getElementById('p-cue').textContent=e.cue;
     document.getElementById('yt-link').href='#';
     document.getElementById('yt-link').onclick=(ev)=>{ev.preventDefault();openVid(e.el,e.yt)};
-    document.getElementById('yt-link').querySelector('span:last-child').textContent='YouTube tutorial →';
+    document.getElementById('yt-link').querySelector('span:last-child').textContent='YouTube →';
+    const mb=document.getElementById('p-machine');
+    if(e.machine){mb.style.display='block';mb.innerHTML=`<div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:.5px;margin-bottom:2px">🏋 ΜΗΧΑΝΗΜΑ ULTRAFLEX</div><div style="font-size:14px;font-weight:700;color:var(--text)">${e.machine}</div>`}else{mb.style.display='none'}
     const di=document.getElementById('ex-demo-inner');
     di.style.cssText='color:var(--text3);font-size:13px;padding:20px';
     di.textContent='Φορτώνει demo...';
@@ -1111,8 +1163,8 @@ function logWorkout(type){
 }
 
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
-const WO_COLORS={push:'#FF6B35',pull:'#0a84ff',legs:'#30d158'};
-const WO_LABELS={push:'PUSH',pull:'PULL',legs:'ΠΟΔΙΑ'};
+const WO_COLORS={push:'#FF6B35',pull:'#0a84ff',legs:'#30d158',pushA:'#FF6B35',pushB:'#FF6B35',pullA:'#0a84ff',pullB:'#0a84ff',legsA:'#30d158',legsB:'#30d158'};
+const WO_LABELS={push:'PUSH',pull:'PULL',legs:'LEGS'};
 
 function renderWoCal(){
   const log=getWoLog();
@@ -1313,21 +1365,36 @@ function saveSettings(){
 const demoCache={};
 // Hardcoded wger.de base IDs for the exercises in this app (search endpoint requires auth)
 const WGER_IDS={
+  'Machine Lateral Raise':1378,
   'Cable Lateral Raise':1378,
-  'Lat Pulldown Wide Grip':158,
   'Incline Chest Press Machine':1655,
+  'Smith Incline Bench Press':1655,
   'Shoulder Press Machine':543,
   'Triceps Pushdown Cable':1185,
-  'Nautilus Pullover Machine':1634,
-  'Chest-Supported Row':1283,
+  'Pec Deck / Πεταλούδα':135,
+  'Low to High Cable Fly':1655,
+  'Iso-Lateral Incline Press Machine':1655,
+  'Overhead Triceps Extension Rope':1185,
+  'Lat Pulldown Neutral Grip':158,
+  'Plate Loaded Pullover Machine':1634,
+  'Cable Rope Pullover':1634,
+  'Chest Supported Row Machine':1283,
+  'Chest Supported Row Flared':1283,
+  'Iso Lateral Pulldown Machine':158,
   'Reverse Pec Deck':828,
+  'Reverse Pec Deck Heavy':828,
   'Biceps Curl Machine':1192,
+  'Preacher Curl Machine':1192,
   'Hip Abduction Machine':1748,
   'Leg Press High Wide':375,
+  'Belt Squat':375,
   'Seated Leg Curl':366,
+  'Seated Leg Curl Heavy':366,
   'Leg Extension':369,
-  'Standing Calf Raise':622,
-  'Pec Deck / Πεταλούδα':135
+  'Glute Kickback Machine':1748,
+  'Seated Calf Raise':622,
+  'Calf Raise Leg Press':622,
+  'Standing Calf Raise':622
 };
 
 async function fetchExDemo(name){
@@ -1355,6 +1422,14 @@ function openVid(name, ytQuery){
   document.getElementById('vid-ex-name').textContent=name;
   document.getElementById('vid-frame').src=`https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(ytQuery)}&rel=0&autoplay=1`;
   document.getElementById('vid-overlay').style.display='flex';
+}
+
+function openMachineImg(){
+  if(!ps||ps.wo==null)return;
+  const e=WO[ps.wo]?.ex?.[ps.ei];
+  if(!e?.machine)return toast('Δεν υπάρχει μηχάνημα στη βάση');
+  const q=encodeURIComponent(e.machine+' gym machine');
+  window.open(`https://www.google.com/search?tbm=isch&q=${q}`,'_blank','noopener');
 }
 function closeVid(){
   document.getElementById('vid-frame').src='about:blank';
