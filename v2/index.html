@@ -439,12 +439,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
 
 <script>
 // ─── DATA ───────────────────────────────────────────
+// ─── ΔΙΑΤΡΟΦΗ — 1500 kcal · 150g protein (deficit για body recomp)
 const MEALS = [
-  {id:'pre', time:'07:20', end:'08:10', icon:'⚡', name:'Pre-workout', kcal:250, prot:25, foods:['1 scoop whey protein','1 μπανάνα']},
-  {id:'post', time:'09:15', end:'10:30', icon:'🥚', name:'Post-workout', kcal:450, prot:40, foods:['3 αυγά ομελέτα (microwave)','200g γιαούρτι 2%','1 κ.γ. ταχίνι']},
-  {id:'lunch', time:'13:00', end:'14:00', icon:'🍗', name:'Μεσημέρι', kcal:620, prot:48, foods:['160g κοτόπουλο ψημένο','150g ρύζι βραστό','Σαλάτα + 1 κ.σ. ελαιόλαδο']},
-  {id:'snack', time:'17:00', end:'18:00', icon:'🥜', name:'Σνακ', kcal:230, prot:22, foods:['200g γιαούρτι 2%','1 κ.σ. peanut butter']},
-  {id:'din', time:'21:00', end:'22:30', icon:'🐟', name:'Βράδυ', kcal:320, prot:35, foods:['150g τόνος (κονσέρβα)','Σαλάτα','1 φέτα ψωμί ολικής']}
+  {id:'pre', time:'07:20', end:'08:10', icon:'⚡', name:'Pre-workout', kcal:200, prot:25, foods:['1 scoop whey protein','½ μπανάνα ή 1 ρυζογκοφρέτα']},
+  {id:'post', time:'09:15', end:'10:30', icon:'🥚', name:'Post-workout', kcal:380, prot:40, foods:['3 αυγά ομελέτα','150g γιαούρτι 2% greek','1 κ.γ. ταχίνι']},
+  {id:'lunch', time:'13:00', end:'14:00', icon:'🍗', name:'Μεσημέρι', kcal:500, prot:45, foods:['140g κοτόπουλο ψημένο','130g ρύζι βραστό','Σαλάτα + ½ κ.σ. ελαιόλαδο']},
+  {id:'snack', time:'17:00', end:'18:00', icon:'🥜', name:'Σνακ', kcal:170, prot:18, foods:['150g γιαούρτι 2% greek','1 κ.γ. peanut butter']},
+  {id:'din', time:'21:00', end:'22:30', icon:'🐟', name:'Βράδυ', kcal:280, prot:32, foods:['150g τόνος (κονσέρβα νερού)','Μεγάλη σαλάτα','1 φέτα ψωμί ολικής']}
 ];
 
 const MEAL_SRC={
@@ -466,49 +467,56 @@ const PREP_STEPS=[
   {emoji:'❄️',title:'Ψυγείο — DONE!',desc:'Βάλε τα 4 tupperware στο ψυγείο\nΚρατάνε 4-5 μέρες ✓\n\nΜόλις εξοικονόμησες 3 ώρες\nμαγειρέματος για ολόκληρη την εβδομάδα!',timer:0,final:true}
 ];
 
-// ─── ULTRAFLEX PLAN (A/B rotation — μονές/ζυγές εβδομάδες) ─────────
+// ─── ULTRAFLEX PLAN — Jeff Nippard/Israetel-aligned · 175cm/75kg/30%BF/1500kcal/150g protein
+// Priority: lats (V-taper) · side delts · upper chest · body recomp σε deficit
 const WO = {
-  pushA:{key:'pushA', base:'push', variant:'A', dayN:'Δευτέρα', day:1, name:'PUSH A', color:'#FF6B35', sub:'Άνω στήθος + πλάγιοι ώμοι', ex:[
-    {el:'Machine Lateral Raise', en:'Machine Lateral Raise', machine:'Atlantis Plate-Loaded Lateral Raise', sets:4, reps:'12-15', rest:45, star:true, cue:'Κάθισμα στο ύψος ώμων. Pads στον ΜΕΣΟ βραχίονα (όχι καρπό). Σήκωσε έξω & ελαφρά πάνω — ΜΗΝ πας πάνω από 90°. Pause 1" στο τέλος. Eccentric 3".', yt:'atlantis plate loaded lateral raise machine form'},
-    {el:'Incline Chest Press 30°', en:'Incline Chest Press Machine', machine:'Prime Plate-Loaded Incline Press', sets:3, reps:'8-10', rest:120, star:true, cue:'Βάθος μέχρι stretch στο άνω στήθος. Σφίξε ωμοπλάτες. Αγκώνες 45° από κορμό, όχι 90°. Scapular retraction.', yt:'prime plate loaded incline press 30 degree form'},
-    {el:'Shoulder Press Machine', en:'Shoulder Press Machine', machine:'Newtech Shoulder Press (plate-loaded)', sets:3, reps:'8-10', rest:90, star:false, cue:'Στήριξη πλάτης στο pad. Μην κλειδώνεις αγκώνες πάνω. Eccentric 3".', yt:'plate loaded shoulder press machine form'},
-    {el:'Pec Deck Fly', en:'Pec Deck / Πεταλούδα', machine:'Olympia M-Torture Pec Deck', sets:3, reps:'12-15', rest:60, star:false, cue:'Σφίξε μπροστά 1" παύση. Αργό άνοιγμα για stretch. Μην σπρώχνεις με ώμο.', yt:'pec deck fly machine proper form'},
-    {el:'Triceps Rope Pushdown', en:'Triceps Pushdown Cable', machine:'Atlantis Functional Trainer', sets:3, reps:'12-15', rest:60, star:false, cue:'Σχοινί, ανοίγματα στο κάτω. Αγκώνες κολλημένοι στα πλευρά.', yt:'rope triceps pushdown cable form'}
+  pushA:{key:'pushA', base:'push', variant:'A', dayN:'Δευτέρα', day:1, name:'PUSH A', color:'#FF6B35', sub:'Άνω στήθος + πλάγιοι (heavy press)', ex:[
+    {el:'Smith Incline Press 30°', en:'Smith Incline Bench Press', machine:'Newtech Smith Machine + bench 30°', sets:4, reps:'6-8', rest:150, star:true, cue:'Bench ΑΚΡΙΒΩΣ 30° (όχι πάνω — γίνεται shoulder press). Μπάρα αγγίζει ψηλά στο στήθος. Σφίξε ωμοπλάτες, scapular retraction. Πόδια σταθερά. Eccentric 3", explode πάνω. Top set: άσε 1-2 reps in reserve (RIR).', yt:'smith machine incline bench press 30 degree jeff nippard form'},
+    {el:'⭐ Cable Lateral Raise', en:'Cable Lateral Raise', machine:'Atlantis Functional Trainer (low pulley)', sets:4, reps:'12-15', rest:60, star:true, cue:'Pulley στο κάτω μέρος. Στάσου πλάι, χέρι περνά μπροστά από κορμί. PINKY ΨΗΛΑ (internal rotation). Σήκωσε σε γωνία 45° μπροστά (όχι ευθεία πλάι). Στάσου χωρίς να ταλαντεύεσαι. Cable >> dumbbell γιατί έχει tension στο stretch.', yt:'cable lateral raise pinky up jeff nippard form'},
+    {el:'Machine Shoulder Press', en:'Shoulder Press Machine', machine:'Newtech Shoulder Press / Atlantis', sets:3, reps:'8-10', rest:90, star:false, cue:'Πλάτη κολλητά στο pad. Λαβή ουδέτερη (palms facing) αν υπάρχει — λιγότερη πίεση στον ώμο. Σταμάτα λίγο πριν το lockout. Eccentric 3".', yt:'machine shoulder press neutral grip form'},
+    {el:'Pec Deck Fly', en:'Pec Deck / Πεταλούδα', machine:'Pec Deck (πεταλούδα)', sets:3, reps:'12-15', rest:60, star:false, cue:'Pads στο κέντρο βραχίονα. Σφίξε μπροστά με pause 1" — squeeze τη μέση στήθους. Άνοιξε ΑΡΓΑ για deep stretch (3" eccentric).', yt:'pec deck fly form'},
+    {el:'Rope Triceps Pushdown', en:'Triceps Pushdown Cable', machine:'Atlantis Functional Trainer (rope)', sets:3, reps:'12-15', rest:60, star:false, cue:'Αγκώνες κολλημένοι, ΑΚΙΝΗΤΟΙ στα πλευρά. Άνοιξε το σχοινί στο κάτω (peak contraction). Eccentric 2-3".', yt:'rope triceps pushdown form'},
+    {el:'Cable Lateral Raise (behind body)', en:'Behind Body Cable Lateral Raise', machine:'Atlantis Functional Trainer', sets:2, reps:'15-20', rest:45, star:false, cue:'Pulley κάτω, στάσου με cable ΠΙΣΩ από σώμα (χέρι πίσω από γοφό). Σήκωσε προς το πλάι — μεγάλος stretch στον πλάγιο. Light weight, high reps. Finisher.', yt:'behind the back cable lateral raise stretch'}
   ]},
-  pushB:{key:'pushB', base:'push', variant:'B', dayN:'Δευτέρα', day:1, name:'PUSH B', color:'#FF6B35', sub:'Βαρύ press + ώμοι', ex:[
-    {el:'Smith Incline Press 30°', en:'Smith Incline Bench Press', machine:'Ultraflex Smith + adjustable bench', sets:4, reps:'6-8', rest:150, star:true, cue:'Βαρύ compound. Bench 30°, μπάρα αγγίζει ψηλά στο στήθος. Πόδια σταθερά, μην σηκώνεις γλουτό.', yt:'smith machine incline bench press form'},
-    {el:'Cable Lateral Raise (μονόπλευρα)', en:'Cable Lateral Raise', machine:'Atlantis Functional Trainer', sets:4, reps:'12-15', rest:45, star:true, cue:'Pulley στο ύψος ισχύου. Στάσου πλάι, χέρι διασταυρώνει μπροστά. Pinky ψηλά.', yt:'cable lateral raise single arm form'},
-    {el:'Iso-Lateral Incline Press', en:'Iso-Lateral Incline Press Machine', machine:'Olympia M-Torture Incline (unilateral)', sets:3, reps:'8-10/side', rest:90, star:false, cue:'Ένα χέρι τη φορά. Στηρίξου με το άλλο. Διορθώνει αριστερή/δεξιά ασυμμετρία.', yt:'iso lateral incline press machine form'},
-    {el:'Cable Upper Chest Fly (low-to-high)', en:'Low to High Cable Fly', machine:'Atlantis Functional Trainer', sets:3, reps:'12-15', rest:60, star:false, cue:'Pulleys κάτω. Σπρώξε χέρια ψηλά & μέσα — αγκαλιά ψηλά. Σφίξε 1" στο κέντρο.', yt:'low to high cable chest fly form'},
-    {el:'Overhead Triceps Ext (rope)', en:'Overhead Triceps Extension Rope', machine:'Atlantis Functional Trainer', sets:3, reps:'12', rest:60, star:false, cue:'Pulley ψηλά, γύρισε πλάτη, σχοινί πίσω από κεφάλι. Stretch long head στο κάτω.', yt:'overhead cable rope triceps extension form'}
+  pushB:{key:'pushB', base:'push', variant:'B', dayN:'Δευτέρα', day:1, name:'PUSH B', color:'#FF6B35', sub:'Άνω στήθος volume + side delt isolation', ex:[
+    {el:'Incline Press Machine', en:'Incline Chest Press Machine', machine:'Plate-loaded Incline Press (chest machine)', sets:4, reps:'8-10', rest:120, star:true, cue:'Άνω στήθος focus. Λαβή στο ύψος του ΑΝΩ στήθους (όχι μέση). Σφίξε ωμοπλάτες στο pad. Σπρώξε ευθεία μπρος-πάνω. Top set RIR 1-2.', yt:'plate loaded incline chest press machine form'},
+    {el:'⭐ Machine Lateral Raise', en:'Machine Lateral Raise', machine:'Lateral Raise Machine (Atlantis/Hammer)', sets:4, reps:'12-15', rest:60, star:true, cue:'Pads στον ΜΕΣΟ βραχίονα. Κάθισε ώστε ώμος ευθυγραμμίζεται με pivot point. Σήκωσε μέχρι παράλληλο, ΟΧΙ ψηλότερα. Pause 1" πάνω. Eccentric 3". Machine δίνει peak tension σε δύσκολο σημείο.', yt:'machine lateral raise form jeff nippard'},
+    {el:'Hoist Roc-It Seated Dip', en:'Seated Dip Machine', machine:'Hoist Roc-It Seated Dip', sets:3, reps:'8-10', rest:90, star:false, cue:'Στήθος μπροστά (όχι κρεμασμένο). Σπρώξε αγκώνες ΚΑΤΩ μέχρι plate stack αγγίζει σχεδόν. Lockout αλλά ΟΧΙ hyperextend. Σφίξε τρικέφαλα 1" πάνω.', yt:'hoist roc-it seated dip form'},
+    {el:'Low-to-High Cable Fly', en:'Low to High Cable Fly', machine:'Atlantis Functional Trainer (low pulleys)', sets:3, reps:'12-15', rest:60, star:false, cue:'Pulleys κάτω. Σπρώξε χέρια ψηλά & μέσα (αγκαλιά ψηλά). Συστολή 1" στο κέντρο πάνω. Στρέφει stress στο ΑΝΩ στήθος.', yt:'low to high cable chest fly upper chest form'},
+    {el:'Reverse Pec Deck', en:'Reverse Pec Deck', machine:'Reverse Pec Deck', sets:3, reps:'15-20', rest:45, star:false, cue:'Rear delts (κρίσιμα για ώμο postural balance). Κάθισε με στήθος στο pad. Pinky ψηλά (external rotation). Σφίξε ωμοπλάτες στο τέλος.', yt:'reverse pec deck rear delt pinky up form'},
+    {el:'Overhead Cable Triceps Ext', en:'Overhead Triceps Extension Rope', machine:'Atlantis Functional Trainer (rope, pulley ψηλά)', sets:2, reps:'12-15', rest:60, star:false, cue:'Pulley ΨΗΛΑ. Γύρισε πλάτη, σχοινί πίσω από κεφάλι. Stretch long head στο κάτω (κρατάμε tension). Έκταση πλήρης πάνω.', yt:'overhead cable rope triceps extension stretch form'}
   ]},
-  pullA:{key:'pullA', base:'pull', variant:'A', dayN:'Τετάρτη', day:3, name:'PULL A', color:'#0a84ff', sub:'Lats focus · V-taper', ex:[
-    {el:'Lat Pulldown (στενή ουδέτερη)', en:'Lat Pulldown Neutral Grip', machine:'Atlantis Lat Pulldown (selectorized)', sets:4, reps:'8-10', rest:120, star:true, cue:'ΟΧΙ φαρδιά! Στενή neutral ή underhand. Lean πίσω 15°. Τράβα αγκώνες ΚΑΤΩ & ΠΙΣΩ — σαν να αγγίζεις πίσω τσέπες.', yt:'lat pulldown close neutral grip form'},
-    {el:'Plate-Loaded Pullover', en:'Plate Loaded Pullover Machine', machine:'Gymleco Standing Pullover', sets:3, reps:'10-12', rest:90, star:true, cue:'Straight-arm — χέρια σχεδόν ίσια. Φέρε βάρος από ψηλά κάτω σε τόξο. ΜΗΝ λυγίζεις αγκώνα.', yt:'plate loaded pullover machine lat form'},
-    {el:'Chest-Supported Row (elbows tucked)', en:'Chest Supported Row Machine', machine:'Prime Extreme Row (plate-loaded)', sets:3, reps:'10-12', rest:90, star:false, cue:'Στήθος στο pad. Αγκώνες κολλημένοι στα πλευρά (lat focus). Τράβα χαμηλά στην κοιλιά.', yt:'prime chest supported row form'},
-    {el:'Reverse Pec Deck', en:'Reverse Pec Deck', machine:'Prime Pec/Rear Delt Combo', sets:3, reps:'15', rest:45, star:false, cue:'Κάθισε ανάποδα στο pec deck. Pinky ψηλά (external rotation). Σφίξε ωμοπλάτες στο τέλος.', yt:'reverse pec deck rear delt form'},
-    {el:'Machine Biceps Curl', en:'Biceps Curl Machine', machine:'Atlantis Biceps Curl (selectorized)', sets:3, reps:'10-12', rest:60, star:false, cue:'Full stretch στο κάτω. Controlled eccentric 2".', yt:'biceps curl machine proper form'}
+  pullA:{key:'pullA', base:'pull', variant:'A', dayN:'Τετάρτη', day:3, name:'PULL A', color:'#0a84ff', sub:'Lats focus · V-taper width', ex:[
+    {el:'⭐ Lat Pulldown (neutral close)', en:'Lat Pulldown Neutral Grip', machine:'Atlantis Lat Pulldown (selectorized)', sets:4, reps:'8-10', rest:120, star:true, cue:'ΣΤΕΝΗ λαβή neutral (παράλληλη) ή underhand — ΟΧΙ φαρδιά! Lean πίσω 15-20°. Σκέψου ότι τραβάς αγκώνες στις πίσω τσέπες. Μπάρα στο ψηλό στήθος. Eccentric 3". Squeeze 1".', yt:'lat pulldown close neutral grip jeff nippard form'},
+    {el:'⭐ Cable Pullover', en:'Cable Rope Pullover', machine:'Atlantis Functional Trainer (pulley ψηλά + σχοινί)', sets:4, reps:'10-12', rest:75, star:true, cue:'ΚΟΡΥΦΑΙΟ για lats. Pulley ΨΗΛΑ. Γονάτισε ή στάσου ελαφρά μπροστά. Χέρια ΣΧΕΔΟΝ ίσια (μικρό bend). Τράβα σε τόξο μέχρι μηρούς. Stretch ψηλά, squeeze κάτω.', yt:'cable rope pullover straight arm jeff nippard form'},
+    {el:'Chest-Supported Row (elbows tucked)', en:'Chest Supported Row Machine', machine:'Newtech M-Torture Front Row (plate-loaded)', sets:3, reps:'10-12', rest:90, star:false, cue:'Στήθος στο pad. Σήμερα = lat focus → αγκώνες ΚΟΛΛΗΤΑ στα πλευρά (όχι έξω). Τράβα ΧΑΜΗΛΑ στην κοιλιά. Σφίξε lats 1".', yt:'chest supported row elbows tucked lat focus form'},
+    {el:'Single-arm Lat Pulldown', en:'Single Arm Lat Pulldown', machine:'Atlantis Functional Trainer (high pulley, D-handle)', sets:3, reps:'10-12/side', rest:60, star:false, cue:'Pulley ψηλά, D-handle. Γονάτισε ή κάθισε. Stretch ΠΑΝΩ (τέντωσε lat). Τράβα κάτω-πίσω. Pinky προς τη μέση. Unilateral = full ROM + δεν χάνεις το αδύναμο πλευρό.', yt:'single arm cable lat pulldown half kneeling form'},
+    {el:'Face Pull (rope)', en:'Face Pull Cable', machine:'Atlantis Functional Trainer (rope, ύψος μετώπου)', sets:3, reps:'15-20', rest:45, star:false, cue:'Pulley στο ύψος μετώπου. Σχοινί. Τράβα στο πρόσωπο, ανοίγοντας — αγκώνες ΨΗΛΑ. External rotation στο τέλος. Rear delt + κάτω trapezius + rotator cuff health.', yt:'face pull rope external rotation form'},
+    {el:'Hoist Biceps Curl', en:'Biceps Curl Machine', machine:'Hoist Roc-It Biceps Curl', sets:3, reps:'10-12', rest:60, star:false, cue:'Αγκώνες ευθυγραμμισμένοι με pivot. Full stretch κάτω (μην το συντομεύεις). Squeeze 1" πάνω. Eccentric 2-3".', yt:'hoist biceps curl machine form'}
   ]},
-  pullB:{key:'pullB', base:'pull', variant:'B', dayN:'Τετάρτη', day:3, name:'PULL B', color:'#0a84ff', sub:'Πάχος πλάτης + rear delt', ex:[
-    {el:'Chest-Supported Row (flared)', en:'Chest Supported Row Flared', machine:'Prime Extreme Row', sets:4, reps:'8-10', rest:120, star:true, cue:'Σήμερα για ΠΑΧΟΣ. Αγκώνες ΕΞΩ σε 45°, τράβα ψηλά στο στήθος. Σφίξε ωμοπλάτες 1".', yt:'chest supported row flared elbow form'},
-    {el:'Iso-Lateral Pulldown (underhand)', en:'Iso Lateral Pulldown Machine', machine:'Plate-Loaded Iso-Lateral Pulldown', sets:3, reps:'10-12', rest:90, star:true, cue:'Independent arms, underhand grip, shoulder-width. Focus: lower lats. Lean 15° πίσω.', yt:'iso lateral pulldown machine underhand form'},
-    {el:'Cable Pullover (rope)', en:'Cable Rope Pullover', machine:'Atlantis Functional Trainer (pulley ψηλά)', sets:3, reps:'12-15', rest:60, star:false, cue:'Γονάτισε μπροστά. Pulley ψηλά, σχοινί. Τράβα με ίσια χέρια μέχρι τους μηρούς.', yt:'cable rope pullover straight arm form'},
-    {el:'Reverse Pec Deck (heavy)', en:'Reverse Pec Deck Heavy', machine:'Prime Pec/Rear Delt', sets:4, reps:'10-12', rest:60, star:false, cue:'Σήμερα πιο βαρύ, χαμηλότερες reps. Peak contraction focus.', yt:'reverse pec deck heavy rear delt form'},
-    {el:'Preacher Curl (plate-loaded)', en:'Preacher Curl Machine', machine:'Prime Torque Preacher Curl', sets:3, reps:'10', rest:60, star:false, cue:'Αγκώνες σταθεροί στο pad. Stretch κάτω, όχι πλήρες extension (κρατάμε tension).', yt:'plate loaded preacher curl form'}
+  pullB:{key:'pullB', base:'pull', variant:'B', dayN:'Τετάρτη', day:3, name:'PULL B', color:'#0a84ff', sub:'Lats stretch + back thickness + rear delts', ex:[
+    {el:'⭐ Iso-Lateral Row (plate-loaded)', en:'Iso Lateral Row Machine', machine:'Plate-Loaded Iso-Lateral Row (Atlantis/Hammer)', sets:4, reps:'8-10', rest:120, star:true, cue:'Σήμερα ΠΑΧΟΣ. Independent arms. Στήθος στο pad. Αγκώνες ΕΞΩ 45°, τράβα ψηλά στο πλευρό. Σφίξε ωμοπλάτες 1" στο τέλος. Eccentric 3" — full stretch.', yt:'iso lateral plate loaded row chest supported form'},
+    {el:'⭐ Wide-Grip Lat Pulldown', en:'Lat Pulldown Wide Grip', machine:'Atlantis Lat Pulldown (wide bar)', sets:3, reps:'10-12', rest:90, star:true, cue:'Σήμερα ΦΑΡΔΙΑ pronated. Lean πίσω 10°. Τράβα στο πάνω στήθος. Lats για ΠΛΑΤΟΣ. Squeeze 1".', yt:'wide grip lat pulldown width form'},
+    {el:'Plate-Loaded Pullover', en:'Plate Loaded Pullover Machine', machine:'Plate-Loaded Pullover (Atlantis ή cable alternative)', sets:3, reps:'10-12', rest:75, star:false, cue:'Lats isolation. Στήθος στο pad. Αγκώνες σταθεροί. Φέρε χέρια από ψηλά κάτω σε τόξο. Stretch ψηλά (αργό 3"), squeeze κάτω.', yt:'plate loaded pullover machine lat isolation form'},
+    {el:'Reverse Pec Deck (heavy)', en:'Reverse Pec Deck Heavy', machine:'Reverse Pec Deck', sets:4, reps:'10-12', rest:60, star:false, cue:'Σήμερα ΒΑΡΥ. Lower reps για στοχευμένη rear delt growth. Pinky ψηλά. Peak contraction 1" στο τέλος.', yt:'reverse pec deck heavy rear delt form'},
+    {el:'Cable High Row (wide)', en:'Cable High Row', machine:'Atlantis Functional Trainer (wide bar, high pulley)', sets:3, reps:'12-15', rest:60, star:false, cue:'Pulley ψηλά, wide bar. Τράβα ΦΑΡΔΙΑ προς ψηλό στέρνο. Αγκώνες ψηλά & έξω. Στοχεύει upper back/rear delt — διαφορετική γωνία από rev pec deck.', yt:'cable high row rear delt form'},
+    {el:'Preacher Curl', en:'Preacher Curl Machine', machine:'Newtech Arm Curl (preacher)', sets:3, reps:'10-12', rest:60, star:false, cue:'Αγκώνες στο pad. Stretch κάτω (όχι πλήρες extension — κρατάμε tension). Squeeze πάνω 1". Eccentric 2-3".', yt:'newtech preacher curl machine form'}
   ]},
-  legsA:{key:'legsA', base:'legs', variant:'A', dayN:'Παρασκευή', day:5, name:'LEGS A', color:'#30d158', sub:'Γλουτοί (medius + maximus)', ex:[
-    {el:'Hip Abduction (lean forward)', en:'Hip Abduction Machine', machine:'Hoist Hip Abduction/Adduction', sets:4, reps:'15-20', rest:60, star:true, cue:'Lean forward 15° — βγάλε στήθος από το pad. Μετατοπίζει focus από TFL στον glute medius. Pause 1" στο άνοιγμα.', yt:'hip abduction lean forward glute medius form'},
-    {el:'Leg Press (πόδια ψηλά + πλατιά)', en:'Leg Press High Wide', machine:'Hoist Roc-It Leg Press', sets:4, reps:'10-12', rest:120, star:true, cue:'Πόδια ΨΗΛΑ στο pad και ΠΛΑΤΙΑ. Γόνατα στη γραμμή των δακτύλων. Βάθος μέχρι τα γοφιά ΜΗΝ κάνουν tuck.', yt:'leg press high wide foot placement glutes'},
-    {el:'Glute Kickback (standing)', en:'Glute Kickback Machine', machine:'Atlantis Glute Kickback', sets:3, reps:'12-15/leg', rest:60, star:false, cue:'Στάσου στην πλατφόρμα. Σφίξε γλουτό ΠΡΩΤΑ, μετά πίεσε πόδι πίσω. Μην λυγίζεις μέση.', yt:'standing glute kickback machine form'},
-    {el:'Seated Leg Curl', en:'Seated Leg Curl', machine:'Atlantis Seated Leg Curl', sets:3, reps:'12-15', rest:60, star:false, cue:'Controlled eccentric 3". Σφίξε hamstring πάνω 1".', yt:'seated leg curl machine form'},
-    {el:'Seated Calf Raise', en:'Seated Calf Raise', machine:'Ultraflex Seated Calf', sets:4, reps:'12-15', rest:45, star:false, cue:'Full stretch κάτω με pause 2". Σφίξε δυνατά στο πάνω.', yt:'seated calf raise machine form full range'}
+  legsA:{key:'legsA', base:'legs', variant:'A', dayN:'Παρασκευή', day:5, name:'LEGS A', color:'#30d158', sub:'Quad focus + γλουτοί + γάμπες', ex:[
+    {el:'⭐ Pendulum Squat', en:'Pendulum Squat', machine:'Pendulum Squat Machine', sets:4, reps:'8-10', rest:150, star:true, cue:'ΚΟΡΥΦΑΙΟ για quads — fixed arc διαδρομή, μηδέν stress στη μέση. Πόδια στο κέντρο του pad. Βάθος μέχρι μηροί παράλληλα ή λίγο κάτω. Drive μέσω φτέρνας. RIR 1-2.', yt:'pendulum squat machine form quads'},
+    {el:'⭐ Seated Leg Curl', en:'Seated Leg Curl', machine:'Seated Leg Curl Machine', sets:4, reps:'10-12', rest:75, star:true, cue:'Σήμερα κανονικό για hams. Pad πάνω από αχίλλειο. Τράβα φτέρνες ΚΑΤΩ-ΠΙΣΩ μέχρι τη βάση καθίσματος. Squeeze 1". Eccentric 3" — full stretch. Seated leg curl > lying λόγω stretched position.', yt:'seated leg curl form hamstrings stretch'},
+    {el:'Leg Extension', en:'Leg Extension', machine:'Newtech Leg Extension', sets:3, reps:'12-15', rest:60, star:false, cue:'Squeeze quads ΣΤΟ ΤΕΛΟΣ ΠΑΝΩ (lockout) 1" παύση. Eccentric 2-3". Top set: 15 full + 8 partials στο πάνω μισό.', yt:'leg extension full range plus partials form'},
+    {el:'Hip Thrust / Glute Drive', en:'Hip Thrust Machine', machine:'Glute Drive / Hip Thrust Machine', sets:3, reps:'10-12', rest:75, star:false, cue:'Pad στους ΓΛΟΥΤΟΥΣ (όχι κοιλιά). Σφίξε γλουτούς ΠΡΩΤΑ, μετά extend hip. Πάνω παύση 1-2". Σιγουρέψου ότι ribs τραβηγμένα κάτω (όχι hyperextend).', yt:'glute drive hip thrust machine form'},
+    {el:'Standing Calf Raise', en:'Standing Calf Raise', machine:'Standing Calf Raise Machine', sets:4, reps:'10-12', rest:60, star:false, cue:'Full ROM: κατέβα μέχρι μέγιστο stretch (2" pause κάτω), ανέβα ψηλά (squeeze 1"). Αργό τέμπο. Standing = gastrocnemius (επιφανειακό).', yt:'standing calf raise full range slow form'},
+    {el:'Hip Abduction (lean forward)', en:'Hip Abduction Machine', machine:'Hip Abduction Machine', sets:3, reps:'15-20', rest:45, star:false, cue:'Lean forward 15° (στήθος μπροστά). Μετατοπίζει stress από TFL → glute medius (αυτό που θες). Pause 1" στο άνοιγμα.', yt:'hip abduction lean forward glute medius form'}
   ]},
-  legsB:{key:'legsB', base:'legs', variant:'B', dayN:'Παρασκευή', day:5, name:'LEGS B', color:'#30d158', sub:'Quads + hamstrings βαρύ', ex:[
-    {el:'Belt Squat (ή Leg Press χαμηλά)', en:'Belt Squat', machine:'Belt Squat machine (ή Hoist Leg Press)', sets:4, reps:'8-10', rest:150, star:true, cue:'Belt squat ΙΔΑΝΙΚΟ: μηδενικό axial fatigue, deep squat, quads focus. Αν πιασμένο → leg press πόδια ΧΑΜΗΛΑ & ΣΤΕΝΑ.', yt:'belt squat machine form quads'},
-    {el:'Seated Leg Curl (heavy)', en:'Seated Leg Curl Heavy', machine:'Atlantis Seated Leg Curl', sets:4, reps:'8-10', rest:90, star:true, cue:'Σήμερα βαρύ για τα hamstrings. Eccentric 3".', yt:'seated leg curl heavy form'},
-    {el:'Leg Extension + partials', en:'Leg Extension', machine:'Prime Leg Extension', sets:3, reps:'15+10 partials', rest:60, star:false, cue:'Μετά 15 reps, κάνε 10 partial reps στο κάτω μισό. Σοβαρό burn στους quads.', yt:'leg extension full range plus partials form'},
-    {el:'Glute Kickback', en:'Glute Kickback Machine', machine:'Atlantis Glute Kickback', sets:3, reps:'12/leg', rest:60, star:false, cue:'Όπως σε Legs A — σφίξε γλουτό πρώτα, μετά πίεσε.', yt:'glute kickback machine form'},
-    {el:'Standing Calf (leg press)', en:'Calf Raise Leg Press', machine:'Hoist Leg Press (μπάλες ποδιών)', sets:3, reps:'12-15', rest:45, star:false, cue:'Πάτα μόνο μπάλες στο κάτω μέρος του leg press pad. Full stretch κάτω.', yt:'leg press calf raise form'}
+  legsB:{key:'legsB', base:'legs', variant:'B', dayN:'Παρασκευή', day:5, name:'LEGS B', color:'#30d158', sub:'Glute focus + hamstrings + γάμπες', ex:[
+    {el:'⭐ Leg Press (πόδια ψηλά + πλατιά)', en:'Leg Press High Wide', machine:'Hoist Roc-It Leg Press', sets:4, reps:'10-12', rest:120, star:true, cue:'Πόδια ΨΗΛΑ στο pad και ΠΛΑΤΙΑ. Δάχτυλα ελαφρά out. Γόνατα στη γραμμή των δαχτύλων. Βάθος βαθύ — γοφοί ΔΕΝ κάνουν tuck (πριν tuck σταματάς).', yt:'leg press high wide foot placement glutes nippard'},
+    {el:'⭐ Romanian Deadlift (Smith)', en:'Smith Romanian Deadlift', machine:'Newtech Smith Machine', sets:3, reps:'8-10', rest:120, star:true, cue:'Hamstrings stretch focus. Μπάρα κρεμασμένη μπροστά μηρών. Push hips ΠΙΣΩ (όχι squat). Γόνατα ελαφρά λυγισμένα. Κατέβα μέχρι νιώσεις deep stretch (~λίγο κάτω από γόνατο). Squeeze γλουτούς πάνω.', yt:'smith machine romanian deadlift hamstrings form'},
+    {el:'Pendulum Squat (medium)', en:'Pendulum Squat', machine:'Pendulum Squat Machine', sets:3, reps:'12-15', rest:75, star:false, cue:'Σήμερα ελαφρύτερο, υψηλές reps, deeper. Πόδια ψηλά και στενά για quad emphasis (δευτερεύον σήμερα).', yt:'pendulum squat machine high reps form'},
+    {el:'Hip Thrust / Glute Drive', en:'Hip Thrust Machine', machine:'Glute Drive / Hip Thrust Machine', sets:3, reps:'12-15', rest:60, star:false, cue:'Σήμερα ελαφρύτερο, παύση 2" πάνω για max glute activation. Squeeze πάρα πολύ.', yt:'glute drive hip thrust slow squeeze form'},
+    {el:'Seated Calf Raise', en:'Seated Calf Raise', machine:'Hoist Roc-It Calf / Seated Calf', sets:4, reps:'12-15', rest:45, star:false, cue:'Σήμερα seated = soleus (βαθύ μυς). Full stretch κάτω 2", squeeze 1" πάνω. Αργό τέμπο.', yt:'seated calf raise soleus form'},
+    {el:'Hip Abduction', en:'Hip Abduction Machine', machine:'Hip Abduction Machine', sets:3, reps:'15-20', rest:45, star:false, cue:'Όπως Legs A — lean forward για glute medius. Burnout finish.', yt:'hip abduction glute medius form'}
   ]}
 };
 
@@ -617,15 +625,15 @@ function getKcalToday(){
 
 function renderQuickLog(){
   const el=document.getElementById('quick-log-area');if(!el)return;
-  const w=getWaterToday(),wGoal=10; // 10 × 250ml = 2.5L
+  const w=getWaterToday(),wGoal=12; // 12 × 250ml = 3L (deficit phase)
   const st=getStepsToday(),stGoal=10000;
-  const p=getProteinToday(),pGoal=140;
+  const p=getProteinToday(),pGoal=150;
   const bar=(v,g,c)=>`<div style="height:6px;background:#ffffff12;border-radius:3px;overflow:hidden;margin-top:6px"><div style="height:100%;width:${Math.min(100,v/g*100)}%;background:${c};border-radius:3px;transition:width .3s"></div></div>`;
   el.innerHTML=`<div style="background:var(--card);border-radius:16px;padding:4px 0;overflow:hidden">
     <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #ffffff0a">
       <div style="font-size:24px">💧</div>
       <div style="flex:1;min-width:0">
-        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:14px;font-weight:700">Νερό</div><div style="font-size:13px;color:var(--text3)"><strong style="color:var(--text)">${(w*0.25).toFixed(2)}L</strong> / 2.5L</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:14px;font-weight:700">Νερό</div><div style="font-size:13px;color:var(--text3)"><strong style="color:var(--text)">${(w*0.25).toFixed(2)}L</strong> / 3L</div></div>
         ${bar(w,wGoal,'#0a84ff')}
       </div>
       <button onclick="decWater()" style="width:32px;height:32px;border-radius:50%;border:1px solid #ffffff22;background:transparent;color:var(--text);font-size:18px;font-weight:700;cursor:pointer">−</button>
@@ -642,7 +650,7 @@ function renderQuickLog(){
     <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
       <div style="font-size:24px">🥩</div>
       <div style="flex:1;min-width:0">
-        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:14px;font-weight:700">Πρωτεΐνη</div><div style="font-size:13px;color:var(--text3)"><strong style="color:var(--text)">${p}g</strong> / 140g</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:14px;font-weight:700">Πρωτεΐνη</div><div style="font-size:13px;color:var(--text3)"><strong style="color:var(--text)">${p}g</strong> / 150g</div></div>
         ${bar(p,pGoal,'#FF6B35')}
       </div>
       <div style="font-size:11px;color:var(--text3);text-align:right;line-height:1.3">από<br>γεύματα</div>
@@ -683,7 +691,7 @@ function renderToday(){
   const s=getSettings();
   const woKey=resolveWoKey(s.days[dow]);
   const wa=document.getElementById('today-workout-area');
-  const kcalEl=document.getElementById('kcal-t');if(kcalEl)kcalEl.textContent=woKey?'~1650':'~1450';
+  const kcalEl=document.getElementById('kcal-t');if(kcalEl)kcalEl.textContent='~1500';
 
   if(woKey){
     const w=WO[woKey];
@@ -694,7 +702,7 @@ function renderToday(){
       <div style="background:${w.color};border-radius:10px;padding:12px;text-align:center;font-size:15px;font-weight:800;color:#fff">Ξεκίνα την προπόνηση →</div>
     </div>`;
   } else {
-    wa.innerHTML=`<div style="background:var(--card);border-radius:16px;padding:24px;text-align:center;margin-bottom:8px"><div style="font-size:40px;margin-bottom:8px">🛋</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">Μέρα ξεκούρασης</div><div style="font-size:14px;color:var(--text3)">Βήματα ≥10.000 · Νερό 2.5L<br>Ύπνος πριν 23:30</div></div>`;
+    wa.innerHTML=`<div style="background:var(--card);border-radius:16px;padding:24px;text-align:center;margin-bottom:8px"><div style="font-size:40px;margin-bottom:8px">🛋</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">Μέρα ξεκούρασης</div><div style="font-size:14px;color:var(--text3)">Βήματα ≥10.000 · Νερό 3L<br>Ύπνος πριν 23:30</div></div>`;
   }
 }
 
@@ -1365,36 +1373,39 @@ function saveSettings(){
 const demoCache={};
 // Hardcoded wger.de base IDs for the exercises in this app (search endpoint requires auth)
 const WGER_IDS={
-  'Machine Lateral Raise':1378,
-  'Cable Lateral Raise':1378,
-  'Incline Chest Press Machine':1655,
   'Smith Incline Bench Press':1655,
+  'Cable Lateral Raise':1378,
+  'Behind Body Cable Lateral Raise':1378,
+  'Machine Lateral Raise':1378,
   'Shoulder Press Machine':543,
-  'Triceps Pushdown Cable':1185,
+  'Incline Chest Press Machine':1655,
   'Pec Deck / Πεταλούδα':135,
-  'Low to High Cable Fly':1655,
-  'Iso-Lateral Incline Press Machine':1655,
+  'Triceps Pushdown Cable':1185,
   'Overhead Triceps Extension Rope':1185,
+  'Low to High Cable Fly':1655,
+  'Seated Dip Machine':1185,
   'Lat Pulldown Neutral Grip':158,
-  'Plate Loaded Pullover Machine':1634,
+  'Lat Pulldown Wide Grip':158,
   'Cable Rope Pullover':1634,
+  'Plate Loaded Pullover Machine':1634,
   'Chest Supported Row Machine':1283,
-  'Chest Supported Row Flared':1283,
-  'Iso Lateral Pulldown Machine':158,
+  'Iso Lateral Row Machine':1283,
+  'Single Arm Lat Pulldown':158,
+  'Face Pull Cable':828,
   'Reverse Pec Deck':828,
   'Reverse Pec Deck Heavy':828,
+  'Cable High Row':1283,
   'Biceps Curl Machine':1192,
   'Preacher Curl Machine':1192,
-  'Hip Abduction Machine':1748,
-  'Leg Press High Wide':375,
-  'Belt Squat':375,
+  'Pendulum Squat':375,
+  'Smith Romanian Deadlift':366,
   'Seated Leg Curl':366,
-  'Seated Leg Curl Heavy':366,
+  'Leg Press High Wide':375,
   'Leg Extension':369,
-  'Glute Kickback Machine':1748,
-  'Seated Calf Raise':622,
-  'Calf Raise Leg Press':622,
-  'Standing Calf Raise':622
+  'Hip Thrust Machine':1748,
+  'Hip Abduction Machine':1748,
+  'Standing Calf Raise':622,
+  'Seated Calf Raise':622
 };
 
 async function fetchExDemo(name){
