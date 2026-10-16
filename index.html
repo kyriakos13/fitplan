@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FitPlan">
-<title>FitPlan</title>
+<meta name="apple-mobile-web-app-title" content="Consistent Body">
+<title>Consistent Body · UltraFlex</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 :root{
@@ -197,6 +197,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
 /* ===== MEAL ALERT ===== */
 .meal-alert{position:fixed;top:var(--st);left:50%;transform:translateX(-50%) translateY(calc(-100% - var(--st) - 20px));width:calc(100% - 32px);max-width:398px;background:var(--card);border-radius:18px;padding:16px;z-index:300;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.6);border:1px solid rgba(255,107,53,.3)}
 .meal-alert.show{transform:translateX(-50%) translateY(0)}
+.focus-card{padding:22px;border:1px solid #ff6b3555;border-radius:20px;background:linear-gradient(135deg,#ff6b3522,#1c1c1e);margin-bottom:12px}.focus-card h1{font-size:28px;margin:10px 0}.focus-eyebrow{font-size:11px;letter-spacing:1px;color:#ffc5ae;font-weight:700}.focus-note{font-size:14px;line-height:1.6;color:var(--text2);margin:12px 0;overflow-wrap:anywhere}.focus-info{padding:16px;margin-bottom:12px}.focus-info summary{font-size:15px;font-weight:700;cursor:pointer}.source-link{color:#ffad8d;display:inline-block;padding:8px 0;font-size:14px}.success{color:#7eed98}.ex-item{width:100%;font:inherit;color:var(--text);text-align:left}.ex-name,.ex-detail{display:block}.set-inputs{display:grid;grid-template-columns:1fr 1fr;gap:12px}.set-inputs label,.entry-label{display:block;font-size:12px;color:var(--text2);line-height:1.5}.entry-label{margin-top:12px}#set-entry input:not([type=checkbox]),#set-entry select{width:100%;font:inherit;font-size:17px;color:var(--text);background:var(--card2);padding:12px;border:1px solid #555;border-radius:9px;user-select:text;margin-top:5px}#set-entry input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin-right:8px}.machine-photo{width:100%;max-height:300px;object-fit:contain;border-radius:10px}.set-big{font-size:46px}.set-area{padding:10px 0}.day-sel:empty{display:none}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.btn-primary{color:#141414}.food-header .focus-note{font-size:12px}
+.machine-photo{max-height:190px;background:#fff}.photo-status{font-size:12px;color:var(--text2);line-height:1.4;margin:6px 0}.set-big{font-size:34px}.set-dots{padding:8px 0}.set-area{padding:4px 0 10px}.player{max-width:600px;margin:0 auto}#p-machine{font-size:13px}#set-entry .focus-note{font-size:13px}
+.set-comparison{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}.set-comparison caption{font-size:11px;color:var(--text3);text-align:left;margin-bottom:6px}.set-comparison th,.set-comparison td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--sep)}.set-comparison thead{color:var(--text3)}.current-set{background:#ff6b351c}.current-set th{color:var(--accent)}.quick-action{font:inherit;font-size:13px;font-weight:600;color:var(--text);background:var(--card2);border:1px solid #666;border-radius:10px;padding:12px;cursor:pointer;min-height:44px;width:100%;margin:8px 0}.quick-action[hidden]{display:none}.busy-button{font-size:12px;margin-bottom:0}#progression-advice{margin-top:14px;font-size:13px}#progression-advice summary{cursor:pointer;color:#ffad8d;min-height:32px}
 </style>
 </head>
 <body>
@@ -209,61 +212,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
         <div class="t-greeting" id="greeting">Καλημέρα 👋</div>
         <div class="t-date" id="today-date"></div>
       </div>
-      <div class="t-section" style="padding-top:10px">
-        <div id="streak-area"></div>
-      </div>
-      <div id="notif-banner" style="display:none;background:var(--card);border-radius:14px;margin:8px 16px 0;padding:14px;border:1px solid rgba(255,107,53,.25)"></div>
-      <div class="t-section">
-        <div class="section-title">ΤΩΡΑ</div>
-        <div id="cur-meal-area"></div>
-        <div id="next-meal-area"></div>
-      </div>
-      <div class="t-section">
-        <div class="section-title">ΣΗΜΕΡΑ ΣΤΟ ΓΥΜ</div>
-        <div id="today-workout-area"></div>
-      </div>
-      <div class="t-section" style="padding-bottom:16px">
-        <div class="section-title">ΣΤΟΧΟΙ ΜΕΡΑΣ</div>
-        <div id="quick-log-area"></div>
-      </div>
+      <div class="t-section"><div id="today-workout-area"></div></div>
+      <div hidden><div id="streak-area"></div><div id="notif-banner"></div><div id="cur-meal-area"></div><div id="next-meal-area"></div><div id="quick-log-area"></div></div>
     </div>
 
     <!-- GYM -->
     <div class="page" id="page-gym">
       <div class="gym-header">
         <div class="gym-title">Γυμναστήριο 💪</div>
-        <div class="gym-sub">Επίλεξε μέρα προπόνησης</div>
+        <div class="gym-sub">Η επόμενη προπόνησή σου, με τη σειρά</div>
       </div>
       <div class="day-sel" id="day-sel"></div>
       <div id="workout-content"></div>
     </div>
 
     <!-- FOOD -->
-    <div class="page" id="page-food">
-      <div class="food-header">
-        <div class="food-title">Διατροφή 🥗</div>
-        <div class="food-total">1650 kcal · 145g πρωτεΐνη</div>
-      </div>
-      <div id="meals-list"></div>
-      <div style="padding:16px">
-        <div class="section-title" style="margin-bottom:10px">ΕΝΑΛΛΑΚΤΙΚΑ</div>
-        <div class="card" style="padding:16px">
-          <div style="font-size:14px;color:var(--text2);line-height:1.9">
-            🔄 Τόνος ↔ Σολομός κονσέρβα<br>
-            🔄 Ρύζι ↔ Πατάτα βραστή ↔ Ψωμί ολικής<br>
-            🔄 Κοτόπουλο ↔ Γαλοπούλα<br>
-            🔄 Γιαούρτι ↔ Cottage cheese
-          </div>
-          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--sep)">
-            <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📦 BATCH COOK ΚΥΡΙΑΚΗ — 4 Tupperware</div>
-            <button onclick="openPrep()" style="width:100%;background:linear-gradient(135deg,rgba(48,209,88,.2),rgba(48,209,88,.06));border:1.5px solid rgba(48,209,88,.4);border-radius:14px;padding:16px;color:var(--green);font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;text-align:center">
-              🍳 Ξεκίνα Meal Prep — Βήμα-Βήμα →
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <div class="page" id="page-food"><div class="food-header"><div class="food-title">Διατροφή</div><p class="focus-note">Δεν περιλαμβάνεται προσωπικό διατροφικό πλάνο στη δημόσια εφαρμογή.</p></div><div id="meals-list"></div></div>
     <!-- TRACK -->
     <div class="page" id="page-track">
       <div class="track-header">
@@ -290,18 +254,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
         <div class="section-title" style="margin-bottom:10px">ΓΥΜΝΑΣΤΗΡΙΟ 💪</div>
         <div id="wo-cal-area"></div>
       </div>
-      <div style="padding:0 16px 16px">
-        <div class="section-title" style="margin-bottom:10px">ΣΤΟΧΟΙ ΙΟΥΛΙΟΣ</div>
-        <div class="card" style="padding:16px">
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--sep)"><span style="color:var(--text3)">Baseline DEXA (Οκτ 2025)</span><span style="font-weight:700">72.2 kg</span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--sep)"><span style="color:var(--text3)">Body fat DEXA</span><span style="font-weight:700">32.7%</span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--sep)"><span style="color:var(--text3)">🎯 Στόχος βάρους</span><span style="font-weight:700;color:var(--accent)">68–69 kg</span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--sep)"><span style="color:var(--text3)">🎯 Μέση στόχος</span><span style="font-weight:700;color:var(--accent)">&lt;80 cm</span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:var(--text3)">🎯 Στόχος BF%</span><span style="font-weight:700;color:var(--accent)">26–28%</span></div>
-        </div>
-      </div>
     </div>
-
     <!-- SETTINGS PAGE -->
     <div class="page" id="page-settings">
       <div style="padding:calc(var(--st) + 4px) 16px 12px">
@@ -316,8 +269,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
 
       <!-- Gym days -->
       <div style="background:var(--card);border-radius:16px;margin:0 16px 12px;padding:16px">
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">📅 Μέρες Γυμναστηρίου</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Επίλεξε τι κάνεις κάθε μέρα</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">📅 Σειρά και ειδοποιήσεις</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Οι προπονήσεις συνεχίζουν από εκεί που έμεινες</div>
         <div id="days-editor"></div>
       </div>
 
@@ -340,12 +293,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
 <!-- EXERCISE PLAYER -->
 <div class="player" id="player">
   <div class="ph">
-    <button class="back-btn" onclick="closePlayer()">✕</button>
+    <button class="back-btn" aria-label="Κλείσιμο, η πρόοδος αποθηκεύεται" onclick="closePlayer()">✕</button>
     <div class="ph-info">
       <div class="ph-name" id="p-name"></div>
       <div class="ph-sub" id="p-sub"></div>
     </div>
-    <button class="back-btn" onclick="resetCurrentEx()" style="font-size:17px;color:var(--text3)" title="Reset σετ">↺</button>
+    <button class="back-btn" aria-label="Αναίρεση τελευταίου σετ" onclick="resetCurrentEx()" style="font-size:17px;color:var(--text3)" title="Αναίρεση τελευταίου σετ">↺</button>
   </div>
   <div class="prog-track"><div class="prog-fill" id="p-prog" style="width:0%"></div></div>
   <div class="pbody" id="pbody">
@@ -362,7 +315,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
       </div>
       <button class="skip-btn" onclick="skipRest()">Παράλειψη →</button>
     </div>
-    <div class="cue-card"><div class="cue-lbl">Form cue</div><div class="cue-txt" id="p-cue"></div></div>
+    <div id="set-entry" class="card focus-info">
+      <p id="set-target" class="focus-note"></p>
+      <div id="set-comparison"></div>
+      <button type="button" id="copy-previous-set" class="quick-action" onclick="copyPreviousSet()" hidden>Βάλε τα προηγούμενα κιλά / επαναλήψεις</button>
+      <div class="set-inputs"><label><span id="load-unit">Κιλά</span><input id="set-load" type="number" inputmode="decimal" min="0" step="0.5" placeholder="π.χ. 10"></label><label>Πραγματικές επαναλήψεις<input id="set-repetitions" type="number" inputmode="numeric" min="1" max="100" placeholder="π.χ. 10"></label></div>
+      <label class="entry-label">RIR · Πόσες ακόμη σωστές επαναλήψεις είχες;<select id="set-rir"><option value="">Επίλεξε…</option><option value="0">0 · Καμία</option><option value="1">1 ακόμη</option><option value="2">2 ακόμη</option><option value="3">3 ακόμη</option><option value="4">4 ακόμη</option><option value="5">5 ή περισσότερες</option></select></label>
+      <label class="entry-label">Μηχάνημα / κάθισμα / λαβή / ρύθμιση<input id="machine-setup" type="text" maxlength="100" placeholder="π.χ. PRIME δεξιά, κάθισμα 3, θέση 2"></label>
+      <label class="entry-label"><input type="checkbox" id="set-clean"> Καθαρή τεχνική, χωρίς πόνο</label>
+      <details id="progression-advice"><summary>Πότε ανεβάζω βάρος;</summary><p id="load-advice" class="focus-note"></p><p id="previous-sets" class="focus-note"></p></details>
+    </div>
+    <p id="session-set-log" class="focus-note" aria-live="polite"></p>
+    <div class="cue-card"><div class="cue-lbl">Πώς εκτελείται</div><div class="cue-txt" id="p-cue"></div></div>
     <div id="p-machine" style="background:linear-gradient(135deg,#ffffff08,#ffffff02);border:1px solid #ffffff10;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:none"></div>
     <div id="ex-demo" style="background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:10px;min-height:80px;display:flex;align-items:center;justify-content:center">
       <div id="ex-demo-inner" style="color:var(--text3);font-size:13px;padding:20px">Φορτώνει demo...</div>
@@ -387,7 +351,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
     </div>
   </div>
   <div class="pfooter">
-    <button class="btn btn-primary" id="set-btn" onclick="doSet()">Ολοκλήρωσα το Σετ ✓</button>
+    <button class="btn btn-primary" id="set-btn" onclick="doSet()">Αποθήκευσε το σετ ✓</button>
     <div style="height:8px"></div>
     <button class="btn btn-secondary" id="next-btn" onclick="nextEx()" style="display:none">Επόμενη Άσκηση →</button>
     <button class="btn btn-green" id="done-btn" onclick="closeDone()" style="display:none">Εντάξει, πάω σπίτι →</button>
@@ -422,7 +386,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="toast" role="status" aria-live="polite" id="toast"></div>
 
 <!-- MEAL ALERT -->
 <div class="meal-alert" id="meal-alert">
@@ -437,16 +401,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;ba
   <div id="al-foods" style="font-size:13px;color:var(--text2);line-height:1.7"></div>
 </div>
 
+<script src="program-data.js"></script>
 <script>
 // ─── DATA ───────────────────────────────────────────
-// ─── ΔΙΑΤΡΟΦΗ — 1500 kcal · 150g protein (deficit για body recomp)
-const MEALS = [
-  {id:'pre', time:'07:20', end:'08:10', icon:'⚡', name:'Pre-workout', kcal:200, prot:25, foods:['1 scoop whey protein','½ μπανάνα ή 1 ρυζογκοφρέτα']},
-  {id:'post', time:'09:15', end:'10:30', icon:'🥚', name:'Post-workout', kcal:380, prot:40, foods:['3 αυγά ομελέτα','150g γιαούρτι 2% greek','1 κ.γ. ταχίνι']},
-  {id:'lunch', time:'13:00', end:'14:00', icon:'🍗', name:'Μεσημέρι', kcal:500, prot:45, foods:['140g κοτόπουλο ψημένο','130g ρύζι βραστό','Σαλάτα + ½ κ.σ. ελαιόλαδο']},
-  {id:'snack', time:'17:00', end:'18:00', icon:'🥜', name:'Σνακ', kcal:170, prot:18, foods:['150g γιαούρτι 2% greek','1 κ.γ. peanut butter']},
-  {id:'din', time:'21:00', end:'22:30', icon:'🐟', name:'Βράδυ', kcal:280, prot:32, foods:['150g τόνος (κονσέρβα νερού)','Μεγάλη σαλάτα','1 φέτα ψωμί ολικής']}
-];
+const MEALS = []; // No personal nutrition prescription in the public build.
 
 const MEAL_SRC={
   pre:  {icon:'⚡',label:'Αμέσως — shake + μπανάνα'},
@@ -468,9 +426,9 @@ const PREP_STEPS=[
 ];
 
 // ─── ULTRAFLEX PLAN v2.1 — Post-review refinement · muscle-clustered order
-// 175cm/75kg/30%BF/1500kcal/150g protein · Priority: lats · side delts · upper chest
+// General exercise library.
 // Volume κρατήθηκε υψηλό (user choice) · order optimized για ADHD-friendly muscle clustering
-const WO = {
+const LEGACY_WO = {
   pushA:{key:'pushA', base:'push', variant:'A', dayN:'Δευτέρα', day:1, name:'PUSH A', color:'#FF6B35', sub:'Στήθος → Ώμοι → Τρικέφαλα (heavy)', ex:[
     {el:'Smith Incline Press 30°', en:'Smith Incline Bench Press', machine:'Newtech Smith Machine + bench 30°', sets:4, reps:'6-8', rest:150, star:true, cue:'Bench ΑΚΡΙΒΩΣ 30° (όχι πάνω). Μπάρα ψηλά στο στήθος. Σφίξε ωμοπλάτες, scapular retraction. Πόδια σταθερά. Eccentric 3", explode πάνω. Top set RIR 1-2.', yt:'smith machine incline bench press 30 degree jeff nippard form'},
     {el:'Pec Deck Fly', en:'Pec Deck / Πεταλούδα', machine:'Pec Deck (πεταλούδα)', sets:3, reps:'12-15', rest:60, star:false, cue:'Pads στο κέντρο βραχίονα. Σφίξε μπροστά με pause 1". Άνοιξε ΑΡΓΑ για deep stretch (3" eccentric). Στήθος ✓', yt:'pec deck fly form'},
@@ -520,6 +478,8 @@ const WO = {
     {el:'Seated Calf Raise', en:'Seated Calf Raise', machine:'Hoist Roc-It Calf / Seated Calf', sets:4, reps:'12-15', rest:45, star:false, cue:'Seated = soleus (βαθύ μυς). Stretch 2" κάτω, squeeze 1" πάνω. Αργό τέμπο.', yt:'seated calf raise soleus form'}
   ]}
 };
+
+const WO = window.CB_PROGRAM?.workouts || LEGACY_WO;
 
 // Week parity — A = μονές (1,3,5…), B = ζυγές (2,4,6…)
 function weekParity(){
@@ -626,7 +586,7 @@ function getKcalToday(){
 
 function renderQuickLog(){
   const el=document.getElementById('quick-log-area');if(!el)return;
-  const w=getWaterToday(),wGoal=12; // 12 × 250ml = 3L (deficit phase)
+  const w=getWaterToday(),wGoal=12;
   const st=getStepsToday(),stGoal=8000; // min 8k · target 10k
   const p=getProteinToday(),pGoal=150;
   const bar=(v,g,c)=>`<div style="height:6px;background:#ffffff12;border-radius:3px;overflow:hidden;margin-top:6px"><div style="height:100%;width:${Math.min(100,v/g*100)}%;background:${c};border-radius:3px;transition:width .3s"></div></div>`;
@@ -964,11 +924,11 @@ function renderTrack(){
   const last7=log.slice(-7).filter(e=>e.w);
   if(last7.length){
     const avgW=(last7.reduce((s,e)=>s+(e.w||0),0)/last7.length).toFixed(1);
-    const diff=(avgW-68.5).toFixed(1);
+
     avg.innerHTML=`<div class="card" style="padding:16px;display:flex;gap:8px">
       <div style="flex:1;text-align:center"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Μ.Ο. 7 ημ.</div><div style="font-size:30px;font-weight:900;color:var(--accent)">${avgW}</div><div style="font-size:11px;color:var(--text3)">kg</div></div>
-      <div style="flex:1;text-align:center"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Στόχος</div><div style="font-size:30px;font-weight:900;color:var(--text3)">68.5</div><div style="font-size:11px;color:var(--text3)">kg</div></div>
-      <div style="flex:1;text-align:center"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Απόσταση</div><div style="font-size:30px;font-weight:900;color:${diff>0?'var(--red)':'var(--green)'}">${diff>0?'+':''}${diff}</div><div style="font-size:11px;color:var(--text3)">kg</div></div>
+
+
     </div>`;
   }
   hist.innerHTML=log.slice().reverse().slice(0,20).map(e=>`<div class="log-row"><span class="log-date">${e.date}</span><span class="log-w">${e.w?e.w+' kg':'–'}</span><span class="log-m">${e.m?e.m+' cm':'–'}</span></div>`).join('')||'<div class="empty-log">–</div>';
@@ -1458,6 +1418,9 @@ if(navigator.storage?.persist){
   });
 }
 
+</script>
+<script src="app-flow.js"></script>
+<script>
 renderToday();renderFood();renderTrack();initGym();
 updateNotifBanner();
 setInterval(()=>{if(curPage==='today')renderToday();checkAlert()},60000);
