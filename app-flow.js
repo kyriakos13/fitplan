@@ -7,7 +7,7 @@ function readProgram(){
   return {cursor:0,active:null,history:[],started:null};
 }
 function writeProgram(state){localStorage.setItem(PROGRAM_KEY,JSON.stringify(state))}
-function nextWorkoutKey(){const s=readProgram();return s.active?.wo || PROGRAM.sequence[s.cursor%PROGRAM.sequence.length]}
+function nextWorkoutKey(){const s=readProgram();const last=s.history.at(-1);return s.active?.wo || (last?PROGRAM.sequence[(PROGRAM.sequence.indexOf(last.wo)+1)%PROGRAM.sequence.length]:PROGRAM.sequence[s.cursor%PROGRAM.sequence.length])}
 function programWeek(){const s=readProgram();return Math.min(PROGRAM.weeks||12,1+Math.floor(s.cursor/(PROGRAM.frequency||3)))}
 function effectiveExercise(e){
   const state=readProgram(),week=state.active?.week||programWeek();
@@ -217,7 +217,7 @@ function ymd(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'
 function logWorkout(type){const log=getWoLog(),date=ymd(new Date());if(!log.some(e=>e.date===date&&e.type===type)){log.push({date,type});localStorage.setItem('fp_wo_log',JSON.stringify(log))}}
 function renderSettings(){
   document.getElementById('gym-time-input').value=getSettings().gymTime;
-  document.getElementById('days-editor').innerHTML='<p class="focus-note">Η σειρά προπονήσεων προχωρά όταν ολοκληρωθούν όλα τα σετ. Οι χαμένες ημέρες δεν τη μηδενίζουν.</p><label class="entry-label"><input id="build-volume-opt" type="checkbox" '+(getSettings().buildVolume?'checked':'')+'> Έχω 50–65′ και αναρρώνω καλά: πρόσθετα σετ από την 3η προπονητική εβδομάδα.</label><p class="focus-note">Αλλιώς μένουν 2 σετ ανά άσκηση. Η αλλαγή ισχύει από την επόμενη νέα προπόνηση.</p><label class="entry-label"><input id="meal-alerts-opt" type="checkbox" '+(getSettings().mealAlerts?'checked':'')+'> Ειδοποιήσεις παλιού πλάνου γευμάτων (προαιρετικές)</label>';
+  document.getElementById('days-editor').innerHTML='<p class="focus-note">Η σειρά προπονήσεων προχωρά όταν ολοκληρωθούν όλα τα σετ. Οι χαμένες ημέρες δεν τη μηδενίζουν.</p><label class="entry-label"><input id="build-volume-opt" type="checkbox" '+(getSettings().buildVolume?'checked':'')+'> Έχω 50–65′ και αναρρώνω καλά: πρόσθετα σετ από την 3η προπονητική εβδομάδα.</label><p class="focus-note">Χωρίς την επιλογή παραμένουν τα βασικά σετ που βλέπεις στο πρόγραμμα. Η αλλαγή ισχύει από την επόμενη νέα προπόνηση.</p><label class="entry-label"><input id="meal-alerts-opt" type="checkbox" '+(getSettings().mealAlerts?'checked':'')+'> Ειδοποιήσεις παλιού πλάνου γευμάτων (προαιρετικές)</label>';
 }
 function saveSettings(){const s={...getSettings(),gymTime:document.getElementById('gym-time-input').value,buildVolume:document.getElementById('build-volume-opt').checked,mealAlerts:document.getElementById('meal-alerts-opt').checked};localStorage.setItem('fp_settings',JSON.stringify(s));renderToday();initGym();toast('Οι ρυθμίσεις αποθηκεύτηκαν')}
 const legacyCheckAlert=checkAlert;
@@ -237,43 +237,6 @@ playerBody.insertBefore(document.getElementById('ex-demo'),setDots);
 Object.assign(WO_COLORS,{A:'#FF6B35',B:'#0a84ff',C:'#30d158'});
 Object.assign(WO_LABELS,{A:'A',B:'B',C:'C'});
 
-// A session-wide notebook: drafts persist independently of set order.
-startToday=function(){renderPlan(nextWorkoutKey());nav('plan')};
-function startLogging(){beginSession();selWorkout(nextWorkoutKey());nav('gym')}
-function sheetValue(active,i,j){return active?.sheet?.[i]?.[j] ?? active?.progress?.[i]?.sets?.[j] ?? {}}
-function saveSheet(input,i,j,field){
-  const s=readProgram();if(!s.active)return;
-  const value={...sheetValue(s.active,i,j),[field]:input.type==='checkbox'?input.checked:input.value};
-  s.active.sheet ||= {};s.active.sheet[i] ||= {};s.active.sheet[i][j]=value;
-  writeProgram(s);document.getElementById('sheet-status').textContent='Αποθηκεύτηκε στη συσκευή';
-}
-selWorkout=function(key){
-  selWo=key;const a=readProgram().active,w=WO[key];
-  document.getElementById('day-sel').innerHTML='';
-  document.getElementById('workout-content').innerHTML=`<div class="sheet-head"><span class="sheet-kicker">ΚΑΤΑΓΡΑΦΗ / ${key}</span><h2>${esc(w.name)}</h2><p>Όλα τα σετ εδώ. Συμπλήρωσε με τη σειρά που σε βολεύει.</p><span id="sheet-status" role="status">${a?'Αυτόματη αποθήκευση στη συσκευή':'Ξεκίνα για να καταγράψεις'}</span>${!a?'<button class="btn btn-primary" onclick="startLogging()">Άνοιγμα καταγραφής</button>':''}</div>
-  ${w.ex.map((raw,i)=>{const e=effectiveExercise(raw),prev=previousExercise(e);return `<section class="sheet-ex"><header><span class="sheet-index">${String(i+1).padStart(2,'0')}</span><div><h3>${esc(e.el)}</h3><p>${e.sets} σετ × ${esc(e.reps)} επαναλήψεις · ${e.rest}″ διάλειμμα · ${esc(loadUnit(e))}</p></div></header>${e.photo?.src?`<figure class="sheet-photo"><img loading="lazy" src="${esc(e.photo.src)}" alt="${esc(e.machine)}"><figcaption>${esc(e.machine)} · Φωτογραφία μοντέλου, όχι επιβεβαιωμένη λήψη του χώρου</figcaption></figure>`:''}<table class="log-grid"><thead><tr><th>Σετ</th><th>Πριν</th><th>Κιλά</th><th>Επαν.</th><th>RIR*</th></tr></thead><tbody>${Array.from({length:e.sets},(_,j)=>{const v=sheetValue(a,i,j),old=prev?.sets[j];return `<tr><th>${j+1}</th><td>${old?esc(old.kg)+' × '+esc(old.reps):'—'}</td>${['kg','reps','rir'].map(f=>`<td><input aria-label="${esc(e.el)} σετ ${j+1} ${f}" type="number" inputmode="${f==='kg'?'decimal':'numeric'}" min="0" ${f==='rir'?'max="10"':''} step="${f==='kg'?'0.5':'1'}" value="${esc(v[f]??'')}" ${a?'':'disabled'} oninput="saveSheet(this,${i},${j},'${f}')"></td>`).join('')}</tr>`}).join('')}</tbody></table><details class="sheet-details"><summary>Μηχάνημα & τεχνική</summary><p>${esc(e.machine)}</p><p>${esc(e.cue)}</p><p>${esc(loadAdvice(e,prev))}</p></details></section>`}).join('')}
-  <div class="sheet-footer"><p>* RIR: πόσες σωστές επαναλήψεις σου έμεναν. Προαιρετικό· χωρίς αυτό δεν προτείνεται αύξηση κιλών.</p><button class="btn btn-primary" onclick="finishSheet()" ${a?'':'disabled'}>Ολοκλήρωση προπόνησης</button><p id="sheet-error" role="alert"></p></div>`;
-};
-function finishSheet(){
-  const s=readProgram();if(!s.active)return;const a=s.active,w=WO[a.wo],progress={};
-  for(let i=0;i<w.ex.length;i++){
-    const e=effectiveExercise(w.ex[i]),sets=[];
-    for(let j=0;j<e.sets;j++){
-      const v=sheetValue(a,i,j),kg=Number(v.kg),reps=Number(v.reps),hasRir=v.rir!==''&&v.rir!=null,rir=hasRir?Number(v.rir):null;
-      if(v.kg==null||v.kg===''||!Number.isFinite(kg)||kg<0||!Number.isInteger(reps)||reps<1||reps>100||(hasRir&&(!Number.isInteger(rir)||rir<0||rir>10))){
-        document.getElementById('sheet-error').textContent=`${e.el}, σετ ${j+1}: έλεγξε κιλά και επαναλήψεις${hasRir?' / RIR':''}. Οι υπόλοιπες τιμές έχουν αποθηκευτεί.`;return;
-      }
-      sets.push({...v,kg,reps,rir,unit:loadUnit(e),setup:v.setup||'',clean:v.clean===true,at:v.at||new Date().toISOString()});
-    }progress[i]={si:sets.length,sets};
-  }
-  a.progress=progress;writeProgram(s);ps.wo=a.wo;showWorkoutDone();renderToday();selWorkout(nextWorkoutKey());nav('today');toast('Η προπόνηση αποθηκεύτηκε');
-}
-renderToday=function(){
-  const s=readProgram(),w=WO[nextWorkoutKey()];
-  document.getElementById('greeting').textContent='Consistent / Body';
-  document.getElementById('today-date').textContent=new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('today-workout-area').innerHTML=`<div class="session-cover"><span class="sheet-kicker">ULTRAFLEX / ΕΒΔΟΜΑΔΑ ${programWeek()}</span><h1>${esc(w.name)}</h1><p>${w.ex.length} ασκήσεις · 3 επισκέψεις / εβδομάδα</p><button class="btn btn-primary" onclick="startToday()">${s.active?'Συνέχεια καταγραφής':'Άνοιγμα προπόνησης'} ↗</button></div><div class="session-preview">${w.ex.map((e,i)=>`<div><span>${String(i+1).padStart(2,'0')}</span><strong>${esc(e.el)}</strong><small>${effectiveExercise(e).sets} × ${esc(e.reps)}</small></div>`).join('')}</div><details class="sheet-details"><summary>Προθέρμανση & οδηγός</summary><p>${esc(PROGRAM.warmup||PROGRAM.intro)}</p><a href="training-guide.html">Οδηγός προγράμματος ↗</a></details>`;
-};
 // Preserve existing logs and remap the active session by exercise identity.
 {
  const state=readProgram();
@@ -287,9 +250,79 @@ renderToday=function(){
   state.revision=PROGRAM.revision;writeProgram(state);
  }
 }
-function renderPlan(key=nextWorkoutKey()){
- const w=WO[key];
- document.getElementById('plan-content').innerHTML=`<div class="sheet-head"><span class="sheet-kicker">ΠΡΟΓΡΑΜΜΑ / 3 ΗΜΕΡΕΣ</span><h2>${esc(w.name)}</h2><div style="display:flex;gap:8px;margin:16px 0">${PROGRAM.sequence.map(k=>`<button class="btn ${k===key?'btn-primary':'btn-secondary'}" onclick="renderPlan('${k}')">${k==='C'?'Γ · Πόδια':k}</button>`).join('')}</div><p>Εικόνα, σετ και επαναλήψεις. Η καταγραφή βρίσκεται στη δική της καρτέλα.</p></div>${w.ex.map(raw=>{const e=effectiveExercise(raw);return `<section class="sheet-ex"><header><div><h3>${esc(e.el)}</h3><p>${esc(e.machine)}</p></div></header>${e.photo?.src?`<figure class="sheet-photo"><img loading="lazy" src="${esc(e.photo.src)}" alt="${esc(e.machine)}" onerror="this.hidden=true;this.nextElementSibling.textContent='Η εικόνα δεν φορτώθηκε. Άνοιξε την πηγή παρακάτω.'"><figcaption>Φωτογραφία μοντέλου · όχι επιβεβαιωμένη λήψη του χώρου</figcaption><a class="source-link" href="${esc(e.photo.sourceUrl)}" target="_blank" rel="noopener">Πηγή εικόνας</a></figure>`:''}<div style="padding:0 18px 20px"><strong style="font-size:24px">${e.sets} σετ × ${esc(e.reps)}</strong><p class="focus-note">${e.rest}″ διάλειμμα</p><details class="sheet-details"><summary>Τεχνική</summary><p>${esc(e.cue)}</p></details></div></section>`}).join('')}`;
+// Shared view state. Browsing another day never replaces an active workout.
+const UI_VERSION='2026.10.18.4';
+let selectedDay=localStorage.getItem('cb_selected_day')||nextWorkoutKey();
+if(!WO[selectedDay])selectedDay=nextWorkoutKey();
+const tabScroll={};
+function selectDay(key){selectedDay=key;localStorage.setItem('cb_selected_day',key);renderPlan();}
+function hasSessionData(a){return Object.values(a?.progress||{}).some(p=>p.sets?.length)||Object.values(a?.sheet||{}).some(rows=>Object.values(rows).some(v=>['kg','reps','rir'].some(f=>v[f]!=null&&v[f]!=='')))}
+function cancelEmptySession(){const s=readProgram();if(!s.active||hasSessionData(s.active))return;s.active=null;writeProgram(s);nav('plan');toast('Η κενή καταγραφή ακυρώθηκε')}
+function sheetValue(a,i,j){return a?.sheet?.[i]?.[j]??a?.progress?.[i]?.sets?.[j]??{}}
+function imageMarkup(e,small=false){return e.photo?.src?`<div class="equipment-image ${small?'small':''}"><img src="${esc(e.photo.src)}" alt="${esc(e.machine)}" loading="lazy" onload="this.parentElement.classList.add('loaded')" onerror="this.hidden=true;this.parentElement.classList.add('failed')"><span class="image-state">Φόρτωση εικόνας…</span><span class="image-error">Η εικόνα δεν είναι διαθέσιμη</span></div>`:''}
+function renderPlan(){
+ const key=selectedDay,w=WO[key],a=readProgram().active;
+ document.getElementById('plan-content').innerHTML=`<div class="sheet-head"><span class="sheet-kicker">CONSISTENT BODY · ΕΒΔΟΜΑΔΑ ${programWeek()}</span><h1>${esc(w.name)}</h1><div class="day-tabs" aria-label="Ημέρα προγράμματος">${PROGRAM.sequence.map(k=>`<button class="btn ${key===k?'btn-primary':'btn-secondary'}" aria-pressed="${key===k}" onclick="selectDay('${k}')">${k==='C'?'Γ · Πόδια':k==='A'?'Α · Άνω':'Β · Άνω'}</button>`).join('')}</div>${a&&a.wo!==key?`<p class="notice">Ενεργή καταγραφή: ${esc(WO[a.wo].name)}. Μπορείς να δεις αυτή την ημέρα, αλλά η καταγραφή θα συνεχίσει την ενεργή προπόνηση.</p>`:''}<button class="btn btn-primary" onclick="startLogging()">${a?'Συνέχεια καταγραφής '+(a.wo==='C'?'Γ':a.wo):'Καταγραφή ημέρας '+(key==='C'?'Γ':key)}</button><details class="sheet-details"><summary>Προθέρμανση & οδηγός</summary><p>${esc(PROGRAM.warmup||PROGRAM.intro)}</p><a href="training-guide.html">Οδηγός προγράμματος</a></details></div>${w.ex.map(raw=>{const e=effectiveExercise(raw);return `<section class="sheet-ex plan-card"><header><h2>${esc(e.el)}</h2></header>${imageMarkup(e)}<div class="plan-dose"><strong>${e.sets} σετ × ${esc(e.reps)}</strong><span>επαναλήψεις · διάλειμμα ${e.rest}″</span></div><details class="sheet-details"><summary>Τεχνική · εικόνα μοντέλου</summary><p>${esc(e.machine)}</p><p>${esc(e.cue)}</p><p>Φωτογραφία κατασκευαστή. Η ταύτιση με το όργανο του χώρου δεν έχει επιβεβαιωθεί.</p>${e.photo?.sourceUrl?`<a href="${esc(e.photo.sourceUrl)}" target="_blank" rel="noopener">Πηγή φωτογραφίας</a>`:''}</details></section>`}).join('')}`;
 }
-const notebookNav=nav;
-nav=function(page){if(page==='plan')renderPlan();if(page==='gym')selWorkout(nextWorkoutKey());notebookNav(page)};
+startToday=function(){nav('plan')};
+function startLogging(){
+ const s=readProgram();if(!s.active){s.active={id:Date.now().toString(36),wo:selectedDay,created:new Date().toISOString(),week:programWeek(),buildVolume:!!getSettings().buildVolume,progress:{}};s.started ||= s.active.created;writeProgram(s)}nav('gym');
+}
+function saveSheet(input,i,j,field){
+ const s=readProgram();if(!s.active)return;s.active.sheet ||= {};s.active.sheet[i] ||= {};
+ s.active.sheet[i][j]={...sheetValue(s.active,i,j),[field]:input.value};writeProgram(s);
+ const cancel=document.getElementById('cancel-empty');if(cancel)cancel.hidden=hasSessionData(s.active);input.removeAttribute('aria-invalid');const error=document.getElementById(`err-${i}-${j}`);if(error)error.textContent='';
+ document.getElementById('sheet-status').textContent='Αποθηκεύτηκε στη συσκευή';document.getElementById('finish-summary').innerHTML='';
+}
+function copyLoads(i){const s=readProgram();if(!s.active)return;const e=WO[s.active.wo].ex[i],previous=previousExercise(e);if(!previous)return;s.active.sheet ||= {};s.active.sheet[i] ||= {};for(let j=0;j<effectiveExercise(e).sets;j++){const v=sheetValue(s.active,i,j);if((v.kg==null||v.kg==='')&&previous.sets[j])s.active.sheet[i][j]={...v,kg:previous.sets[j].kg}}writeProgram(s);selWorkout(s.active.wo);toast('Συμπληρώθηκαν μόνο τα κιλά. Πρόσθεσε τις σημερινές επαναλήψεις.');}
+selWorkout=function(){
+ const a=readProgram().active,key=a?.wo||selectedDay,w=WO[key];selWo=key;
+ document.getElementById('day-sel').innerHTML='';
+ document.getElementById('workout-content').innerHTML=`<div class="sheet-head"><h1>${esc(w.name)}</h1><p id="sheet-status" role="status">${a?'Αυτόματη αποθήκευση στη συσκευή':'Δεν έχει ξεκινήσει καταγραφή'}</p>${!a?'<button class="btn btn-primary" onclick="startLogging()">Έναρξη καταγραφής</button>':!hasSessionData(a)?'<button id="cancel-empty" class="text-button" onclick="cancelEmptySession()">Ακύρωση κενής καταγραφής</button>':''}</div>${w.ex.map((raw,i)=>{const e=effectiveExercise(raw),prev=previousExercise(e);return `<section class="sheet-ex log-card"><header>${imageMarkup(e,true)}<div><h2>${esc(e.el)}</h2><p>${esc(loadUnit(e))}</p><p>Στόχος ${e.sets} × ${esc(e.reps)}</p></div></header>${prev?`<p class="previous-line">Προηγούμενα: ${prev.sets.map(x=>esc(x.kg)+' × '+esc(x.reps)).join(' · ')}</p><button class="text-button" onclick="copyLoads(${i})" ${!a?'disabled':''}>Ίδια κιλά με πριν</button>`:''}<div class="set-heading"><span>Σετ</span><span>Κιλά</span><span>Επαναλήψεις</span></div>${Array.from({length:e.sets},(_,j)=>{const v=sheetValue(a,i,j);return `<div class="set-row" id="row-${i}-${j}"><span>${j+1}</span>${['kg','reps'].map(f=>`<input id="field-${i}-${j}-${f}" aria-label="${esc(e.el)} σετ ${j+1} ${f==='kg'?'κιλά':'επαναλήψεις'}" aria-describedby="err-${i}-${j}" type="number" inputmode="${f==='kg'?'decimal':'numeric'}" min="${f==='kg'?0:1}" step="${f==='kg'?'any':1}" value="${esc(v[f]??'')}" ${!a?'disabled':''} oninput="saveSheet(this,${i},${j},'${f}')">`).join('')}</div><p class="inline-error" id="err-${i}-${j}" role="alert"></p>`}).join('')}<details class="sheet-details"><summary>Προαιρετικά · RIR</summary><p>Πόσες σωστές επαναλήψεις έμεναν. Δεν υπολογίζονται αυτόματες αυξήσεις κιλών από αυτό μόνο.</p>${Array.from({length:e.sets},(_,j)=>`<label class="rir-field">Σετ ${j+1}<input aria-label="${esc(e.el)} σετ ${j+1} RIR" type="number" inputmode="numeric" min="0" max="10" step="1" value="${esc(sheetValue(a,i,j).rir??'')}" ${!a?'disabled':''} oninput="saveSheet(this,${i},${j},'rir')"></label>`).join('')}</details></section>`}).join('')}<div class="sheet-footer"><button class="btn btn-primary" onclick="finishSheet()" ${!a?'disabled':''}>Τέλος προπόνησης</button><div id="finish-summary" role="status"></div><p>Μπορείς να φύγεις από την καρτέλα και να συνεχίσεις αργότερα.</p></div>`;
+};
+function collectSession(){
+ const a=readProgram().active;if(!a)return null;const exercises=[];let missing=0,total=0;
+ for(const [i,raw] of WO[a.wo].ex.entries()){
+  const e=effectiveExercise(raw),sets=[],skipped=[];
+  for(let j=0;j<e.sets;j++){
+   const v=sheetValue(a,i,j),blank=x=>x==null||x==='';
+   if(blank(v.kg)&&blank(v.reps)&&blank(v.rir)){missing++;skipped.push(j+1);continue}
+   const kg=Number(v.kg),reps=Number(v.reps),rir=blank(v.rir)?null:Number(v.rir);
+   let field=blank(v.kg)||!Number.isFinite(kg)||kg<0?'kg':blank(v.reps)||!Number.isInteger(reps)||reps<1||reps>100?'reps':rir!==null&&(!Number.isInteger(rir)||rir<0||rir>10)?'rir':null;
+   if(field){const message=field==='rir'?'Το RIR πρέπει να είναι ακέραιος 0–10.':'Συμπλήρωσε έγκυρα κιλά και επαναλήψεις ή άφησε και τα δύο κενά.';document.getElementById(`err-${i}-${j}`).textContent=message;const el=field==='rir'?document.querySelectorAll('.log-card')[i].querySelectorAll('.rir-field input')[j]:document.getElementById(`field-${i}-${j}-${field}`);if(field==='rir')el.closest('details').open=true;el.setAttribute('aria-invalid','true');el.focus();el.scrollIntoView({block:'center'});return null}
+   sets.push({...v,kg,reps,rir,setNumber:j+1,unit:loadUnit(e),setup:v.setup||'',clean:v.clean===true,at:new Date().toISOString()});total++;
+  }
+  exercises.push({id:exerciseId(e),name:e.el,machine:e.machine,sets,skipped});
+ }return {exercises,missing,total};
+}
+function finishSheet(confirmPartial=false){
+ const data=collectSession();if(!data)return;
+ if(!data.total){document.getElementById('finish-summary').textContent='Δεν έχει καταγραφεί κανένα σετ. Η προπόνηση παραμένει ανοιχτή.';return}
+ if(data.missing&&!confirmPartial){document.getElementById('finish-summary').innerHTML=`<p>${data.total} σετ καταγράφηκαν · ${data.missing} δεν έγιναν.</p><button class="btn btn-secondary" onclick="finishSheet(true)">Αποθήκευση με ${data.missing} παραλείψεις</button><button class="text-button" onclick="document.getElementById('finish-summary').innerHTML=''">Συνέχεια συμπλήρωσης</button>`;return}
+ const s=readProgram(),a=s.active;
+ s.history.push({id:a.id,wo:a.wo,date:ymd(new Date()),finished:new Date().toISOString(),week:a.week,exercises:data.exercises,partial:!!data.missing,cursorBefore:s.cursor,sessionSnapshot:a});s.cursor++;s.active=null;writeProgram(s);logWorkout(a.wo);selectedDay=nextWorkoutKey();localStorage.setItem('cb_selected_day',selectedDay);nav('track');toast('Η προπόνηση αποθηκεύτηκε');
+}
+function undoLatest(){
+ const s=readProgram(),last=s.history.at(-1);if(!last?.sessionSnapshot||s.active)return;
+ s.history.pop();s.cursor=last.cursorBefore;s.active=last.sessionSnapshot;writeProgram(s);
+ const logs=getWoLog();if(!s.history.some(h=>h.date===last.date&&h.wo===last.wo))localStorage.setItem('fp_wo_log',JSON.stringify(logs.filter(h=>!(h.date===last.date&&h.type===last.wo))));
+ selectedDay=s.active.wo;localStorage.setItem('cb_selected_day',selectedDay);nav('gym');toast('Η προπόνηση άνοιξε για διόρθωση');
+}
+const legacyMeasurements=document.getElementById('page-track').innerHTML;
+renderTrack=function(){
+ const s=readProgram();document.getElementById('page-track').innerHTML=`<div class="sheet-head"><h1>Πρόοδος</h1><p>${s.history.length} αποθηκευμένες προπονήσεις</p></div>${!s.history.length?'<p class="empty-state">Οι προπονήσεις σου θα εμφανιστούν εδώ με τα πραγματικά κιλά και τις επαναλήψεις.</p>':''}${[...s.history].reverse().map((h,i)=>`<details class="history-card" ${i===0?'open':''}><summary>${esc(h.date)} · ${esc(WO[h.wo]?.name||h.wo)}${h.partial?' · με παραλείψεις':''}</summary>${(h.exercises||[]).map(e=>`<div class="history-ex"><strong>${esc(e.name||e.id)}</strong><p>${e.sets.length?e.sets.map((v,j)=>`Σετ ${v.setNumber||j+1}: ${esc(v.kg)} ${esc(v.unit||'kg')} × ${esc(v.reps)}`).join('<br>'):'Δεν εκτελέστηκε'}</p>${e.skipped?.length?`<p>Παραλείφθηκαν σετ: ${e.skipped.join(', ')}</p>`:''}</div>`).join('')}${i===0&&h.sessionSnapshot&&!s.active?'<button class="btn btn-secondary" onclick="undoLatest()">Άνοιγμα ξανά για διόρθωση</button>':''}</details>`).join('')}<details class="history-card"><summary>Προαιρετικές μετρήσεις σώματος</summary><div id="measurements-panel">${legacyMeasurements}</div></details>`;
+ // Existing measurements stay intact; only their own list is rendered here.
+ const logs=getLog();document.getElementById('log-hist').innerHTML=logs.slice().reverse().map(e=>`<p>${esc(e.date)} · ${esc(e.w??'—')} kg · ${esc(e.m??'—')} cm</p>`).join('')||'<p>Δεν υπάρχουν μετρήσεις.</p>';
+ document.getElementById('wo-cal-area').parentElement.hidden=true;
+};
+renderToday=function(){};
+const oldRenderSettings=renderSettings;
+renderSettings=function(){oldRenderSettings();const note=document.querySelector('#days-editor .focus-note');if(note)note.textContent='Η σειρά προχωρά όταν αποθηκεύσεις την προπόνηση, ακόμη και με ρητές παραλείψεις. Μπορείς να επιλέξεις άλλη ημέρα πριν ξεκινήσεις.';if(!document.getElementById('app-version'))document.getElementById('page-settings').insertAdjacentHTML('beforeend',`<div class="sheet-footer" id="app-version"><p>Έκδοση ${UI_VERSION} · Τα δεδομένα μένουν σε αυτή τη συσκευή.</p><button class="btn btn-secondary" onclick="exportData()">Εξαγωγή αντιγράφου ασφαλείας</button></div>`)};
+nav=function(page){
+ if(page==='today')page='plan';
+ if(curPage)tabScroll[curPage]=document.getElementById('page-'+curPage)?.scrollTop||0;
+ document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+page));
+ document.querySelectorAll('.nb').forEach(el=>{el.classList.toggle('active',el.dataset.page===page);if(el.dataset.page===page)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});
+ curPage=page;if(page==='plan')renderPlan();if(page==='gym')selWorkout();if(page==='track')renderTrack();if(page==='settings')renderSettings();
+ document.getElementById('page-'+page).scrollTop=tabScroll[page]||0;
+};
