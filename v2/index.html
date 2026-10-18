@@ -218,6 +218,8 @@ body{max-width:760px;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe U
 <style>.nav{backdrop-filter:none;background:var(--bg)}.nb.active{background:#e0e8d7;border-radius:10px}.nb{min-width:58px;padding:6px 9px}.meal-alert{box-shadow:none}.cur-meal,.focus-card,#p-machine{background:var(--card)!important;border:1px solid var(--sep)!important}.source-link{color:var(--accent)}</style><style>
 :root{color-scheme:dark;--bg:#080a09;--card:#141815;--card2:#232923;--accent:#b8df97;--green:#b8df97;--text:#f0f3ed;--text2:#bbc4b7;--text3:#939f90;--sep:#30392e}
 body,input,button,select{font-family:Arial,Helvetica,sans-serif}.nav{background:#080a09}.nb.active{background:#263322}.btn-primary{background:var(--accent);color:#14200e}.session-cover{background:#182016;border:1px solid var(--sep)}.sheet-ex{background:var(--card)}.log-grid input{background:#242d21;color:var(--text)}.log-grid input:focus{background:#303d2b}.sheet-photo{margin:0 14px 14px}.sheet-photo img{display:block;width:100%;height:210px;object-fit:contain;background:#fff;border-radius:8px}.sheet-photo figcaption{font-size:11px;line-height:1.5;color:var(--text3);padding:8px 0}.session-cover h1{font-weight:600}.sheet-kicker{letter-spacing:1px}#sheet-error{color:#ffaaa0}
+</style><style>
+body{font-family:Arial,Helvetica,sans-serif}.sheet-head h1{font-size:26px;letter-spacing:-.6px;margin:10px 0 16px}.sheet-head p{font-size:14px}.sheet-kicker{font-size:12px}.day-tabs{display:flex;gap:8px;margin-bottom:16px}.day-tabs button{font-size:14px}.sheet-head .sheet-details{padding:8px 0 0}.sheet-ex h2{font-size:18px;line-height:1.35;font-weight:600}.sheet-details{font-size:14px;padding:10px 16px}.sheet-details summary{min-height:44px;display:flex;align-items:center}.sheet-details a{display:inline-block;min-height:44px;padding:10px 0}.plan-card header{padding:14px 16px}.equipment-image{height:180px;margin:0 14px;position:relative;background:#20271e;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}.equipment-image img{width:100%;height:100%;object-fit:contain;opacity:0}.equipment-image.loaded{background:#fff}.equipment-image.loaded img{opacity:1}.image-state,.image-error{position:absolute;font-size:13px;padding:12px;text-align:center;color:var(--text2)}.image-error{display:none}.loaded .image-state,.failed .image-state{display:none}.failed .image-error{display:block}.equipment-image.small{height:64px;width:64px;flex-shrink:0;margin:0}.small .image-state,.small .image-error{font-size:10px;padding:3px}.plan-dose{padding:14px 16px 0;display:flex;flex-direction:column;gap:6px}.plan-dose strong{font-size:24px}.plan-dose span{font-size:14px;color:var(--text2)}.log-card header{align-items:center;padding:16px;gap:12px}.log-card header p{font-size:13px;line-height:1.5}.set-heading,.set-row{display:grid;grid-template-columns:36px 1fr 1fr;gap:10px;padding:4px 16px;align-items:center}.set-heading{font-size:13px;color:var(--text2)}.set-row>span{font-size:14px}.set-row input,.rir-field input{width:100%;min-width:0;min-height:48px;border:1px solid #46523e;border-radius:8px;background:#242d21;color:var(--text);font-size:18px;padding:10px;user-select:text}.set-row input:focus,.rir-field input:focus{outline:2px solid var(--accent)}[aria-invalid=true]{border-color:#ffaaa0!important}.inline-error{font-size:13px;color:#ffaaa0;margin:0 16px;line-height:1.5}.inline-error:empty{display:none}.rir-field{display:flex;align-items:center;gap:16px;margin:10px 0}.rir-field input{width:100px}.text-button{border:0;background:transparent;color:var(--accent);font:inherit;font-size:14px;padding:12px 16px;min-height:44px;cursor:pointer}.previous-line{margin:0 16px;font-size:14px;color:var(--text2)}.notice{padding:12px;border:1px solid var(--sep);border-radius:8px;margin:12px 0;line-height:1.5}.history-card{margin:12px 16px;background:var(--card);border:1px solid var(--sep);border-radius:12px;padding:16px}.history-card>summary{min-height:44px;font-size:16px;line-height:1.5;cursor:pointer}.history-ex{padding:14px 0;border-top:1px solid var(--sep);line-height:1.6;font-size:14px}.history-ex p{color:var(--text2)}.empty-state{padding:16px;font-size:16px;line-height:1.6}.nb{flex:1;min-width:0;gap:5px}.nb-label{font-size:12px}.nav{padding:8px 10px var(--sb);gap:4px;min-height:calc(68px + var(--sb))}.page{padding-bottom:calc(85px + var(--sb))}.gym-header{display:none}#measurements-panel .track-header,#measurements-panel .ti-title{display:none}.sheet-footer p{font-size:14px}.btn{min-height:48px}.focus-note{font-size:14px}
 </style></head>
 <body>
 <div class="app">
@@ -248,18 +250,18 @@ body,input,button,select{font-family:Arial,Helvetica,sans-serif}.nav{background:
     <!-- TRACK -->
     <div class="page" id="page-track">
       <div class="track-header">
-        <div class="track-title">Tracking 📊</div>
+        <div class="track-title">Μετρήσεις σώματος</div>
       </div>
       <div class="ti-card">
         <div class="ti-title">Σημερινές μετρήσεις</div>
         <div class="input-row">
-          <div class="ig"><label>⚖️ Βάρος (kg)</label><input type="number" class="ti" id="w-in" placeholder="–" step="0.1" min="50" max="120"></div>
-          <div class="ig"><label>📏 Μέση (cm)</label><input type="number" class="ti" id="m-in" placeholder="–" step="0.5" min="60" max="120"></div>
+          <div class="ig"><label>Βάρος (kg)</label><input type="number" class="ti" id="w-in" placeholder="–" step="0.1" min="50" max="120"></div>
+          <div class="ig"><label>Μέση (cm)</label><input type="number" class="ti" id="m-in" placeholder="–" step="0.5" min="60" max="120"></div>
         </div>
         <button class="btn btn-primary" onclick="saveLog()">Αποθήκευση ✓</button>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="exportData()" style="flex:1;padding:10px;background:var(--card2);border:none;border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">📤 Export backup</button>
-          <button onclick="importData()" style="flex:1;padding:10px;background:var(--card2);border:none;border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">📥 Import</button>
+          <button onclick="exportData()" style="flex:1;padding:10px;background:var(--card2);border:none;border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">Εξαγωγή αντιγράφου</button>
+          <button onclick="importData()" style="flex:1;padding:10px;background:var(--card2);border:none;border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">Εισαγωγή αντιγράφου</button>
         </div>
       </div>
       <div id="avg-area" style="padding:0 16px 12px"></div>
@@ -292,17 +294,16 @@ body,input,button,select{font-family:Arial,Helvetica,sans-serif}.nav{background:
       </div>
 
       <div style="padding:0 16px 16px">
-        <button class="btn btn-primary" onclick="saveSettings()">Αποθήκευση ⚙️</button>
+        <button class="btn btn-primary" onclick="saveSettings()">Αποθήκευση</button>
       </div>
     </div>
 
   </div><!-- /pages -->
 
   <nav class="nav">
-    <button class="nb active" data-page="today" onclick="nav('today')"><span class="nb-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3z"/></svg></span><span class="nb-label">Σήμερα</span></button>
-    <button class="nb" data-page="gym" onclick="nav('gym')"><span class="nb-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1"/></svg></span><span class="nb-label">Καταγραφή</span></button>
-    <button class="nb" data-page="plan" onclick="nav('plan')"><span class="nb-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nb-label">Πρόγραμμα</span></button>
-    <button class="nb" data-page="track" onclick="nav('track')"><span class="nb-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 15l4-5 4 2 5-7"/></svg></span><span class="nb-label">Ιστορικό</span></button>
+    <button class="nb" data-page="plan" onclick="nav('plan')"><span class="nb-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1"/></svg></span><span class="nb-label">Πρόγραμμα</span></button>
+    <button class="nb" data-page="gym" onclick="nav('gym')"><span class="nb-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L20 8l-4-4L4 16v4zM14 6l4 4"/></svg></span><span class="nb-label">Καταγραφή</span></button>
+    <button class="nb" data-page="track" onclick="nav('track')"><span class="nb-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 15l4-5 4 2 5-7"/></svg></span><span class="nb-label">Πρόοδος</span></button>
     <button class="nb" data-page="settings" onclick="nav('settings')"><span class="nb-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg></span><span class="nb-label">Ρυθμίσεις</span></button>
   </nav>
 </div>
@@ -418,7 +419,7 @@ body,input,button,select{font-family:Arial,Helvetica,sans-serif}.nav{background:
   <div id="al-foods" style="font-size:13px;color:var(--text2);line-height:1.7"></div>
 </div>
 
-<script charset="utf-8" src="program-data.js?v=20261018-plan3"></script>
+<script charset="utf-8" src="program-data.js?v=20261018-ux4"></script>
 <script>
 // ─── DATA ───────────────────────────────────────────
 const MEALS = []; // No personal nutrition prescription in the public build.
@@ -1436,9 +1437,9 @@ if(navigator.storage?.persist){
 }
 
 </script>
-<script charset="utf-8" src="app-flow.js?v=20261018-plan3"></script>
+<script charset="utf-8" src="app-flow.js?v=20261018-ux4"></script>
 <script>
-renderToday();renderFood();renderTrack();initGym();
+initGym();nav('plan');
 updateNotifBanner();
 setInterval(()=>{if(curPage==='today')renderToday();checkAlert()},60000);
 checkAlert();
