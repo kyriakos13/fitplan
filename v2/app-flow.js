@@ -236,3 +236,40 @@ playerBody.insertBefore(document.getElementById('p-machine'),setDots);
 playerBody.insertBefore(document.getElementById('ex-demo'),setDots);
 Object.assign(WO_COLORS,{A:'#FF6B35',B:'#0a84ff',C:'#30d158'});
 Object.assign(WO_LABELS,{A:'A',B:'B',C:'C'});
+
+// A session-wide notebook: drafts persist independently of set order.
+startToday=function(){beginSession();selWorkout(nextWorkoutKey());nav('gym')};
+function sheetValue(active,i,j){return active?.sheet?.[i]?.[j] ?? active?.progress?.[i]?.sets?.[j] ?? {}}
+function saveSheet(input,i,j,field){
+  const s=readProgram();if(!s.active)return;
+  const value={...sheetValue(s.active,i,j),[field]:input.type==='checkbox'?input.checked:input.value};
+  s.active.sheet ||= {};s.active.sheet[i] ||= {};s.active.sheet[i][j]=value;
+  writeProgram(s);document.getElementById('sheet-status').textContent='Αποθηκεύτηκε στη συσκευή';
+}
+selWorkout=function(key){
+  selWo=key;const a=readProgram().active,w=WO[key];
+  document.getElementById('day-sel').innerHTML='';
+  document.getElementById('workout-content').innerHTML=`<div class="sheet-head"><span class="sheet-kicker">TRAINING LOG / ${key}</span><h2>${esc(w.name)}</h2><p>Όλα τα σετ εδώ. Συμπλήρωσε με τη σειρά που σε βολεύει.</p><span id="sheet-status" role="status">${a?'Αυτόματη αποθήκευση στη συσκευή':'Ξεκίνα για να καταγράψεις'}</span>${!a?'<button class="btn btn-primary" onclick="startToday()">Άνοιγμα καταγραφής</button>':''}</div>
+  ${w.ex.map((raw,i)=>{const e=effectiveExercise(raw),prev=previousExercise(e);return `<section class="sheet-ex"><header><span class="sheet-index">${String(i+1).padStart(2,'0')}</span><div><h3>${esc(e.el)}</h3><p>${esc(e.reps)} επαν. · ${e.rest}″ διάλειμμα · ${esc(loadUnit(e))}</p></div></header><table class="log-grid"><thead><tr><th>Σετ</th><th>Πριν</th><th>Κιλά</th><th>Επαν.</th><th>RIR*</th></tr></thead><tbody>${Array.from({length:e.sets},(_,j)=>{const v=sheetValue(a,i,j),old=prev?.sets[j];return `<tr><th>${j+1}</th><td>${old?esc(old.kg)+' × '+esc(old.reps):'—'}</td>${['kg','reps','rir'].map(f=>`<td><input aria-label="${esc(e.el)} σετ ${j+1} ${f}" type="number" inputmode="${f==='kg'?'decimal':'numeric'}" min="0" ${f==='rir'?'max="10"':''} step="${f==='kg'?'0.5':'1'}" value="${esc(v[f]??'')}" ${a?'':'disabled'} oninput="saveSheet(this,${i},${j},'${f}')"></td>`).join('')}</tr>`}).join('')}</tbody></table><details class="sheet-details"><summary>Μηχάνημα & τεχνική</summary><p>${esc(e.machine)}</p><p>${esc(e.cue)}</p>${e.photo?.src?`<img loading="lazy" src="${esc(e.photo.src)}" alt="${esc(e.machine)}"><p>Φωτογραφία μοντέλου · η ταύτιση στον χώρο παραμένει προς επιβεβαίωση.</p>`:''}<p>${esc(loadAdvice(e,prev))}</p></details></section>`}).join('')}
+  <div class="sheet-footer"><p>* RIR: πόσες σωστές επαναλήψεις σου έμεναν. Προαιρετικό· χωρίς αυτό δεν προτείνεται αύξηση κιλών.</p><button class="btn btn-primary" onclick="finishSheet()" ${a?'':'disabled'}>Ολοκλήρωση προπόνησης</button><p id="sheet-error" role="alert"></p></div>`;
+};
+function finishSheet(){
+  const s=readProgram();if(!s.active)return;const a=s.active,w=WO[a.wo],progress={};
+  for(let i=0;i<w.ex.length;i++){
+    const e=effectiveExercise(w.ex[i]),sets=[];
+    for(let j=0;j<e.sets;j++){
+      const v=sheetValue(a,i,j),kg=Number(v.kg),reps=Number(v.reps),hasRir=v.rir!==''&&v.rir!=null,rir=hasRir?Number(v.rir):null;
+      if(v.kg==null||v.kg===''||!Number.isFinite(kg)||kg<0||!Number.isInteger(reps)||reps<1||reps>100||(hasRir&&(!Number.isInteger(rir)||rir<0||rir>10))){
+        document.getElementById('sheet-error').textContent=`${e.el}, σετ ${j+1}: έλεγξε κιλά και επαναλήψεις${hasRir?' / RIR':''}. Οι υπόλοιπες τιμές έχουν αποθηκευτεί.`;return;
+      }
+      sets.push({...v,kg,reps,rir,unit:loadUnit(e),setup:v.setup||'',clean:v.clean===true,at:v.at||new Date().toISOString()});
+    }progress[i]={si:sets.length,sets};
+  }
+  a.progress=progress;writeProgram(s);ps.wo=a.wo;showWorkoutDone();renderToday();selWorkout(nextWorkoutKey());nav('today');toast('Η προπόνηση αποθηκεύτηκε');
+}
+renderToday=function(){
+  const s=readProgram(),w=WO[nextWorkoutKey()];
+  document.getElementById('greeting').textContent='Consistent / Body';
+  document.getElementById('today-date').textContent=new Date().toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('today-workout-area').innerHTML=`<div class="session-cover"><span class="sheet-kicker">ULTRAFLEX / ΕΒΔΟΜΑΔΑ ${programWeek()}</span><h1>${esc(w.name)}</h1><p>${w.ex.length} ασκήσεις · 3 επισκέψεις / εβδομάδα</p><button class="btn btn-primary" onclick="startToday()">${s.active?'Συνέχεια καταγραφής':'Άνοιγμα προπόνησης'} ↗</button></div><div class="session-preview">${w.ex.map((e,i)=>`<div><span>${String(i+1).padStart(2,'0')}</span><strong>${esc(e.el)}</strong><small>${effectiveExercise(e).sets} × ${esc(e.reps)}</small></div>`).join('')}</div><details class="sheet-details"><summary>Προθέρμανση & οδηγός</summary><p>${esc(PROGRAM.warmup||PROGRAM.intro)}</p><a href="training-guide.html">Οδηγός προγράμματος ↗</a></details>`;
+};
